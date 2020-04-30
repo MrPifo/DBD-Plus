@@ -15,7 +15,7 @@ Download the program "DBD Plus.jar" and simply execute it to run it. After that 
 
 ### Features
 
-A list of features this program can do:
+A list of features this program can achieve:
 
 - Showing the **killer in pre-lobby**.
 - Can **detect a great amount of killer perks** when ingame.
