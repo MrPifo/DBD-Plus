@@ -78,9 +78,9 @@ For software updates, an automatic updater is implemented. Just click the versio
 ## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details.
-You can share and improve my software. Please send me the improved version of yours.
+You can share and improve my software. Please upload your version and send me an email to: dbdplus.official@gmail.com
 
 ## Issues/Help
 
-If you find any issues/improvements/bugs please create an Issue and clearly descrive your problem.
+If you find any issues/improvements/bugs please create an Issue and clearly descrine your problem.
 
