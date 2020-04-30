@@ -1,6 +1,6 @@
 # DBD-Plus
 
-DBD-Plus is a assistance software for Dead By Daylight to give you informations, which are normally not displayed ingame.
+DBD-Plus is an assistance software for Dead By Daylight to give you informations, which are normally not displayed ingame.
 
 ## Getting Started
 
@@ -8,79 +8,38 @@ Download the program "DBD Plus.jar" and simply execute it to run it. After that 
 
 ![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview0.png)
 
-### Prerequisites
+### Software Requirements
 
-What things you need to install the software and how to install them
+- Make sure Java 1.8 or higher is installed.
+- If you have not already installed Java: https://www.java.com/de/download/
 
-```
-Give examples
-```
+### Features
 
-### Installing
+A list of features this program can do:
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+- Showing the **killer in pre-lobby**.
+- Can **detect a great amount of killer perks** when ingame.
+- Dangerous **Killer-Offerings**(Ebony, Ivory, Cypress Mori)
+- See how many **totems** have been cleansed.
+- Current **Map** that is played.
+- How many vaults have spawned on the current map.
+- How many pallets have spawned on the current map.
+- See amount of destroyed pallets by killer.
+- See Killer/Survivor player nametags.
+- See current hookstage of individual survivors.
+- See current action of every survivor. Example(Action: repairing; Action: healing; etc...)
+- See a progression slider for Borrowed-Time before it deactivates.
+- Support for Light/Dark-Theme.
+- Automatic App-Version update.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+For software updates, an automatic updater is implemented. Just click the version number on bottom left when it says that a new version is avialable. If the updating process fails, just download the newest version from github.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the  License - see the [LICENSE.md](LICENSE.md) file for details.
+You can share and improve my software. Please send me the improved 
 
 ## Acknowledgments
 
