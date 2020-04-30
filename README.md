@@ -34,37 +34,37 @@ A list of features this program can achieve:
 
 ## Perks which cannot be detected:
 
-Agitation 
-Bloodhound
-Bloodecho
-DeerStalker
-Discordance
-Lightborn
-Cruel Limits
-Distressing 
-Frankling's Demise
-Furtive Chase
-Gearhead
-Infectious Fright
-Insidious
-Iron Grasp
-Madgrit
-Monitor Abuse
-Monstrous Shrine
-Pop Goes The Weasel
-Nemesis
-Play With Your Food
-Predator
-Overcharge
-Save The Best For Last
-Shadowborn
-Spies From The Shadows
-Spirit Fury
-Surge
-Surveillance
-Unrelenting
-Whispers
-Zanshin Tactics
+-Agitation 
+-Bloodhound
+-Bloodecho
+-DeerStalker
+-Discordance
+-Lightborn
+-Cruel Limits
+-Distressing 
+-Frankling's Demise
+-Furtive Chase
+-Gearhead
+-Infectious Fright
+-Insidious
+-Iron Grasp
+-Madgrit
+-Monitor Abuse
+-Monstrous Shrine
+-Pop Goes The Weasel
+-Nemesis
+-Play With Your Food
+-Predator
+-Overcharge
+-Save The Best For Last
+-Shadowborn
+-Spies From The Shadows
+-Spirit Fury
+-Surge
+-Surveillance
+-Unrelenting
+-Whispers
+-Zanshin Tactics
 
 ## Known Issues
 
