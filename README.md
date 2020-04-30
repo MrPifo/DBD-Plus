@@ -1,10 +1,12 @@
 # DBD-Plus
 
-One Paragraph of project description goes here
+DBD-Plus is a assistance software for Dead By Daylight to give you informations, which are normally not displayed ingame.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Download the program "DBD Plus.jar" and simply execute it to run it. After that it should display something like this:
+
+![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview0.png)
 
 ### Prerequisites
 
