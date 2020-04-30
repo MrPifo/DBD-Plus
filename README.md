@@ -1,6 +1,7 @@
 # DBD-Plus
 
 DBD-Plus is an assistance software for Dead By Daylight to give you informations, which are normally not displayed ingame.
+Download: [DBD Plus.jar](https://www.sperlich.at/games/dbdplus/DBD%20Plus.jar)
 
 ## Getting Started
 
