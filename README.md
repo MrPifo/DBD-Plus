@@ -19,6 +19,8 @@ Download "DBD Plus.jar" and simply execute to run it. After that it should displ
 
 ### Features
 
+Currently my software is strongly survivor sided. I'm working toward to improve the program for Killer gameplay.
+
 A list of features this program can achieve:
 
 - Showing the **killer in pre-lobby**.
