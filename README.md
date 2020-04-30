@@ -38,11 +38,10 @@ For software updates, an automatic updater is implemented. Just click the versio
 
 ## License
 
-This project is licensed under the  License - see the [LICENSE.md](LICENSE.md) file for details.
-You can share and improve my software. Please send me the improved 
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details.
+You can share and improve my software. Please send me the improved version of yours.
 
-## Acknowledgments
+## Issues/Help
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+If you find any issues/improvements/bugs please create an Issue and clearly descrive your problem.
+
