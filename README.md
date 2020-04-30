@@ -32,6 +32,45 @@ A list of features this program can achieve:
 - Support for Light/Dark-Theme.
 - Automatic App-Version update.
 
+## Perks which cannot be detected:
+
+Agitation 
+Bloodhound
+Bloodecho
+DeerStalker
+Discordance
+Lightborn
+Cruel Limits
+Distressing 
+Frankling's Demise
+Furtive Chase
+Gearhead
+Infectious Fright
+Insidious
+Iron Grasp
+Madgrit
+Monitor Abuse
+Monstrous Shrine
+Pop Goes The Weasel
+Nemesis
+Play With Your Food
+Predator
+Overcharge
+Save The Best For Last
+Shadowborn
+Spies From The Shadows
+Spirit Fury
+Surge
+Surveillance
+Unrelenting
+Whispers
+Zanshin Tactics
+
+## Known Issues
+
+- Spirit Fury confuses "Destroyed Pallets" counter.
+- Legions ultra rare addon (Iridescent Button) confuses "Destroyed Pallets" counter.
+
 ## Versioning
 
 For software updates, an automatic updater is implemented. Just click the version number on bottom left when it says that a new version is avialable. If the updating process fails, just download the newest version from github.
