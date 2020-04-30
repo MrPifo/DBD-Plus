@@ -6,7 +6,7 @@ DBD-Plus is an assistance software for Dead By Daylight to give you informations
 
 Download the program "DBD Plus.jar" and simply execute it to run it. After that it should display something like this:
 
-![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview0.png)
+![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview1.png)
 
 ### Software Requirements
 
