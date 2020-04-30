@@ -5,7 +5,7 @@ Download: [DBD Plus.jar](https://www.sperlich.at/games/dbdplus/DBD%20Plus.jar)
 
 ## Getting Started
 
-Download "DBD Plus.jar" and simply execute to run it. After that it should display something like this:
+Download "[DBD Plus.jar](https://www.sperlich.at/games/dbdplus/DBD%20Plus.jar)" and simply execute to run it. After that it should display something like this:
 
 ![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview2.png)
 
