@@ -8,6 +8,10 @@ Download the program "DBD Plus.jar" and simply execute it to run it. After that 
 
 ![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview2.png)
 
+### Notes
+
+** This program is not a HACK! Neither does it modify your gamefiles nor does it read your memory in anyway. Because of that EasyAntiCheat cannot detect this program.**
+
 ### Software Requirements
 
 - Make sure Java 1.8 or higher is installed.
