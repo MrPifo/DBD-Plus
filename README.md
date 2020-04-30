@@ -10,7 +10,7 @@ Download "DBD Plus.jar" and simply execute to run it. After that it should displ
 
 ### Notes
 
-** This program is not a HACK! Neither does it modify your gamefiles nor does it read your memory in anyway. Because of that EasyAntiCheat cannot detect this program.**
+**This program is not a HACK! Neither does it modify your gamefiles nor does it read your memory in anyway. Because of that EasyAntiCheat cannot detect this program.**
 
 ### Software Requirements
 
