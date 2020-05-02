@@ -78,6 +78,14 @@ A list of features this program can achieve:
 - Spirit Fury confuses "Destroyed Pallets" counter.
 - Legions ultra rare addon (Iridescent Button) confuses "Destroyed Pallets" counter.
 
+### Updates
+
+## 1.2.2
+
+- Added colors for every survivor
+- Added indication when a survivor is dead
+- Fixed an error that occurred when only 3 survivors where found
+
 ## Versioning
 
 For software updates, an automatic updater is implemented. Just click the version number on bottom left when it says that a new version is avialable. If the updating process fails, just download the newest version from github.
