@@ -81,6 +81,14 @@ A list of features this program can achieve:
 
 ## Updates
 
+### 1.2.5
+
+- Added survivor chasing icon
+- Added locker action for survivor
+- Improved version checker
+- Fixed a bug that caused high CPU usage
+- Fixed and improved hook counter and death detector
+
 ### 1.2.4
 
 - Replaced some survivor actions with icons for better visibility
