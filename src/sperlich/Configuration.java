@@ -14,7 +14,7 @@ public class Configuration implements Serializable {
 	public void save() {
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("/DBDPlus/dbdplus.config"));
-			oos.writeObject(Main.config);
+			oos.writeObject(Runtime.config);
 			oos.close();
 		} catch (IOException e) {
 			throw new ExceptionHandler("ERROR: Couldn't save configuration.");
@@ -24,7 +24,7 @@ public class Configuration implements Serializable {
 	public void load() {
 		try {
 			ObjectInputStream objectInput = new ObjectInputStream(new FileInputStream("/DBDPlus/dbdplus.config"));
-			Main.config = (Configuration) objectInput.readObject();
+			Runtime.config = (Configuration) objectInput.readObject();
 			objectInput.close();
 		} catch (IOException e) {
 			throw new ExceptionHandler("ERROR: Couldn't load configuration.");

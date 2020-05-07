@@ -79,7 +79,7 @@ public class App {
 		programStarted = false;
 		isRunning = false;
 		autoStruggle = false;
-		Main.mouseButton1Hold = false;
+		Runtime.mouseButton1Hold = false;
 		record.stopRecord();
 		//startButton.setText("Start");
 		//startButton.setBackground(new Color(225, 75, 75));
@@ -288,7 +288,6 @@ public class App {
 		float searchWidth = radius * 0.2f;
 		hitPoints = 0;
 		float anglePointer = 0f;
-		circle:
 		for (float i=0;i<360;i+=1.2f) {
 			double xDir = Math.cos(Math.toRadians(i));
 			double yDir = Math.sin(Math.toRadians(i));
@@ -486,7 +485,7 @@ class Record extends Thread {
 		} else {
 			app.hitkey = ' ';
 		}*/
-		if (isRunning && Main.mouseButton1Hold) {
+		if (isRunning && Runtime.mouseButton1Hold) {
 			app.screenshot();
 		}
 		/*if (app.whiteDetected && app.programStarted) {

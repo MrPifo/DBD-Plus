@@ -26,7 +26,7 @@ class Input extends Thread {
             @Override
             public void keyPressed(GlobalKeyEvent event) {
                 try {
-                    Main.keyPressed(event);
+                    Runtime.keyPressed(event);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -36,7 +36,7 @@ class Input extends Thread {
 
             @Override
             public void keyReleased(GlobalKeyEvent event) {
-                Main.keyReleased(event);
+                Runtime.keyReleased(event);
             }
         });
 
@@ -67,14 +67,14 @@ class MouseInput extends Thread {
             @Override
             public void mousePressed(GlobalMouseEvent event)  {
                 if (event.getButton() == GlobalMouseEvent.BUTTON_LEFT) {
-                    Main.leftMouseButtonPressed();
+                    Runtime.leftMouseButtonPressed();
                 }
             }
 
             @Override
             public void mouseReleased(GlobalMouseEvent event)  {
                 if (event.getButton() == GlobalMouseEvent.BUTTON_LEFT) {
-                    Main.leftMouseButtonReleased();
+                    Runtime.leftMouseButtonReleased();
                 }
             }
 
