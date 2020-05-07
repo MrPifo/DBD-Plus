@@ -85,6 +85,7 @@ A list of features this program can achieve:
 
 - Added survivor chasing icon
 - Added locker action for survivor
+- Changed to maintain match stats after escaping or dying and only to reset when leaving the game
 - Improved version checker
 - Fixed a bug that caused high CPU usage
 - Fixed and improved hook counter and death detector
