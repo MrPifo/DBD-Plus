@@ -1,0 +1,12 @@
+.title {
+	-fx-fill: #f40;
+}
+.backgroundPane {
+	-fx-background-color: #FFFFFF;
+}
+Text {
+	-fx-fill: #111;
+}
+.downloadBar {
+	-fx-accent: #f40;
+}
