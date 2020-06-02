@@ -1,10 +1,11 @@
 # DBD-Plus
 
 DBD-Plus is an assistance software for Dead By Daylight to give you informations, which are normally not displayed ingame.
+Download: [DBD Plus.jar](https://www.sperlich.at/dbdplusdownload.php?download=true)
 
 ## Getting Started
 
-Download "DBD Plus.jar" and simply execute to run it. After that it should display something like this:
+Download [DBD Plus.jar](https://www.sperlich.at/dbdplusdownload.php?download=true) and simply execute to run it. After that it should display something like this:
 
 ![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview2.png)
 
@@ -74,8 +75,57 @@ A list of features this program can achieve:
 
 ## Known Issues
 
-- Spirit Fury confuses "Destroyed Pallets" counter.
+- Spirit Fury confuses "Destroyed Pallets" counter
+- Spirit Fury deactivated at the moment
 - Legions ultra rare addon (Iridescent Button) confuses "Destroyed Pallets" counter.
+
+## Updates
+
+### 1.5
+
+This update adds a lot of new features. So it may happen that there are still some bugs to be expecting. If you have such bugs, then send me under 'Feedback' a comment and describe your bug as detailed as possible.
+
+- Added Auto-Skillcheck feature (Experimental)
+  -> This feature currently works different for everyone else. It may work good on your side but on others not. It's a little bit random at the moment. I'm still looking into it to improve as much as I can, that's why it is marked as experimental. 
+- Added feature to see Killer Steam-Profile in lobby (Click on Killer Picture to open URL).
+- Added Exitgate action indication.
+- Added Totem action indication.
+- Added Feedback feature (Send me comments to tell me problems/bugs/improvements).
+- Added Patchnotes under 'Help'.
+- Added 'CheckUpdates'.
+- Added Hatch Spawn indication icon.
+- Added bloodpoints counter for current session
+- New icon for action 'Chasing Survivor'.
+- Optimized program size
+- Removed uneccessary code
+- Fixed Timer stopping after crash
+- Various Bugfixes
+
+### 1.2.5
+
+- Added survivor chasing icon
+- Added locker action for survivor
+- Changed to maintain match stats after escaping or dying and only to reset when leaving the game
+- Improved version checker
+- Fixed a bug that caused high CPU usage
+- Fixed and improved hook counter and death detector
+
+### 1.2.4
+
+- Replaced some survivor actions with icons for better visibility
+- Fixed survivor hook counts (can still be randomly broken)
+- Cleaned up unused code and refactored some code for better readability
+
+### 1.2.3
+
+- Added an icon when a survivor escaped
+- Fixed a crash when a player had unsupported characers in their nametag
+
+### 1.2.2
+
+- Added colors for every survivor
+- Added indication when a survivor is dead
+- Fixed an error that occurred when only 3 survivors where found
 
 ## Versioning
 
