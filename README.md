@@ -81,6 +81,26 @@ A list of features this program can achieve:
 
 ## Updates
 
+### 1.5
+
+This update adds a lot of new features. So it may happen that there are still some bugs to be expecting. If you have such bugs, then send me under 'Feedback' a comment and describe your bug as detailed as possible.
+
+- Added Auto-Skillcheck feature (Experimental)
+  -> This feature currently works different for everyone else. It may work good on your side but on others not. It's a little bit random at the moment. I'm still looking into it to improve as much as I can, that's why it is marked as experimental. 
+- Added feature to see Killer Steam-Profile in lobby (Click on Killer Picture to open URL).
+- Added Exitgate action indication.
+- Added Totem action indication.
+- Added Feedback feature (Send me comments to tell me problems/bugs/improvements).
+- Added Patchnotes under 'Help'.
+- Added 'CheckUpdates'.
+- Added Hatch Spawn indication icon.
+- Added bloodpoints counter for current session
+- New icon for action 'Chasing Survivor'.
+- Optimized program size
+- Removed uneccessary code
+- Fixed Timer stopping after crash
+- Various Bugfixes
+
 ### 1.2.5
 
 - Added survivor chasing icon
