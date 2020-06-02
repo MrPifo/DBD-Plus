@@ -10,6 +10,8 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class Configuration implements Serializable {
 	public String selectedTheme;
+	public boolean performSkillchecks;
+	public char skillCheckLetter;
 
 	public void save() {
 		try {
@@ -26,10 +28,11 @@ public class Configuration implements Serializable {
 			ObjectInputStream objectInput = new ObjectInputStream(new FileInputStream("/DBDPlus/dbdplus.config"));
 			Runtime.config = (Configuration) objectInput.readObject();
 			objectInput.close();
-		} catch (IOException e) {
-			throw new ExceptionHandler("ERROR: Couldn't load configuration.");
-		} catch (ClassNotFoundException e) {
-			throw new ExceptionHandler("ERROR: Couldn't load configuration properly.");
+		} catch (Exception e) {
+			Log.out("Failed to load save file! Creating new...");
+			Runtime.config = new Configuration();
+			Runtime.config.performSkillchecks = false;
+			Runtime.config.skillCheckLetter = ' ';
 		}
 	}
 }

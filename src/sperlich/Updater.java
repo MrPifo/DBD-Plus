@@ -41,4 +41,5 @@ public class Updater extends Thread {
         	Runtime.downloadProgress.setVisible(false);
         }
 	}
+
 }

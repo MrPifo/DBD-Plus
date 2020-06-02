@@ -1,5 +1,6 @@
 package sperlich;
 
+import com.sun.glass.events.KeyEvent;
 import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
@@ -12,14 +13,24 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -32,9 +43,11 @@ import javafx.util.Duration;
 import lc.kra.system.keyboard.event.GlobalKeyEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.awt.Desktop;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.swing.ImageIcon;
 import java.awt.AWTException;
-import java.awt.Desktop;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.TrayIcon.MessageType;
@@ -43,11 +56,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.File;
 
-
 public class Runtime extends Application {
-	public static App app;
 	public static GameReader game;
-	public static String appVersion = "v1.2.5";
+	public static String appVersion = "v1.5";
 	public static String download = "https://www.sperlich.at/storage/content/DBD%20Plus.jar";
 	public static String downloadPath = System.getProperty("user.dir") + "/DBD Plus.jar";
 	public static String lightTheme;
@@ -68,6 +79,8 @@ public class Runtime extends Application {
 	public static Text appVersionText;
 	public static Text startLoadText;
 	public static Text survivorsTitle;
+	public static Text hatchTitle;
+	public static Text totalBloodpoints;
 	public static Text[] survivorNames = new Text[4];
 	public static Text[] totalHooks = new Text[4];
 	public static Text[] survivorAction = new Text[4];
@@ -79,6 +92,7 @@ public class Runtime extends Application {
 	public static ImageView killerBackground;
 	public static ImageView killerOffering;
 	public static ImageView loadImage;
+	public static ImageView hatchImage;
 	public static ImageView[] killerPerks = new ImageView[4];
 	public static ImageView[] killerPerkFrames = new ImageView[4];
 	public static ImageView[] deadSymbols = new ImageView[4];
@@ -89,7 +103,9 @@ public class Runtime extends Application {
 	public static HBox totemsBox;
 	public static HBox palletsBox;
 	public static HBox vaultsBox;
+	public static HBox bloodpointsBox;
 	public static VBox mapBox;
+	public static CheckMenuItem skillCheckMenuItem;
 	public static Configuration config = new Configuration();
 	public static boolean uiInitialized;
 	public static boolean mouseButton1Hold;
@@ -99,29 +115,36 @@ public class Runtime extends Application {
 	public static WinUser.INPUT input;
 	public static Font font;
 	public static Parent root;
-	
+	public static TextArea feedback;
+	public Stage commentWindow;
+	public Stage setKeyWindow;
+	public static char skillCheckLetter = 'P';
+	public static FXMLLoader loader;
+	public static DropShadow oldShadow;
+	public static String killerSteamURL;
 
 	public static void main(String[] args) {
 		Log.out("Application started.");
-		try {
-			Application.launch(args);
-		} catch (Exception e) {
-			throw new ExceptionHandler("Unexpected ERROR occurred.");
-		}
+		Application.launch(args);
 	}
 	
 	@Override
 	public void init() {
-		keyboardThread = new Input();
-		keyboardThread.start();
-		mouseThread = new MouseInput();
-		mouseThread.start();
+		//keyboardThread = new Input();
+		//keyboardThread.start();
+		//mouseThread = new MouseInput();
+		//mouseThread.start();
 		initializeUserInput();
 	}
 	
 	@Override
-	public void start(Stage stage) throws Exception {
-		root = FXMLLoader.load(getClass().getResource("window.fxml"));
+	public void start(Stage stage) {
+		loader = new FXMLLoader(getClass().getResource("window.fxml"));
+		try {
+			root = loader.load();
+		} catch (IOException e1) {
+			Log.out("Failed to load FXMLLoader");
+		}
 		Runtime.scene = new Scene(root, 1000, 600);
 		stage.setTitle("DBD Plus");
 		stage.setMinHeight(600);
@@ -142,6 +165,8 @@ public class Runtime extends Application {
 		}
 		body = (AnchorPane) root.lookup("#body");
 		killerName = (Text) root.lookup("#killerId");
+		hatchTitle = (Text) root.lookup("#hatchTitle");
+		hatchImage = (ImageView) root.lookup("#hatch");
 		killerPlayerName = (Text) root.lookup("#killerName");
 		matchStatusTime = (Text) root.lookup("#gameStatusTime");
 		killerPic = (ImageView) root.lookup("#killerPic");
@@ -156,8 +181,10 @@ public class Runtime extends Application {
 		totemsBox = (HBox) root.lookup("#totemsBox");
 		palletsBox = (HBox) root.lookup("#palletsBox");
 		vaultsBox = (HBox) root.lookup("#vaultsBox");
+		bloodpointsBox = (HBox) root.lookup("#bloodpointsBox");
 		mapBox = (VBox) root.lookup("#mapContainer");
 		survivorsTitle = (Text) root.lookup("#survivorsTitle");
+		totalBloodpoints = (Text) root.lookup("#totalBloodpoints");
 		startUpLoadBar = (ProgressBar) root.lookup("#startUpLoadingBar");
 		startLoadText = (Text) root.lookup("#startLoadText");
 		startScreen = root.lookup("#startScreen");
@@ -218,6 +245,8 @@ public class Runtime extends Application {
 		vaultsBox.setVisible(false);
 		survivorsTitle.setVisible(false);
 		mapBox.setVisible(false);
+		hatchTitle.setVisible(false);
+		hatchImage.setVisible(false);
 		uiInitialized = true;
 		final Task<Void> task = new Task<Void>() {
             @Override
@@ -240,7 +269,9 @@ public class Runtime extends Application {
 		Log.out("UI successfully rendered.");
 		Runtime.scene.getStylesheets().add(css.toString());
 		Runtime.config.load();
+		skillCheckLetter = config.skillCheckLetter;
 		setLoadTheme();
+		loadPerformSkillChecks();
 		checkForUpdate();
 		stage.show();
 	}
@@ -254,8 +285,201 @@ public class Runtime extends Application {
 		body.getChildren().remove(startScreen);
 	}
 	
+	public void openFeedbackWindow() {
+		commentWindow = new Stage();
+		BorderPane div = new BorderPane();
+		feedback = new TextArea();
+		feedback.setWrapText(true);
+		feedback.setPromptText("Write your feedback here:");
+		div.setStyle("-fx-background-color: #111");
+		Label title = new Label("Write your feedback here: \n "
+				+ "\n You may include: "
+				+ "\n - Suggestions"
+				+ "\n - Improvements "
+				+ "\n - New Features "
+				+ "\n - Bugs "
+				+ "\n - Anything else \n "
+				+ "\n You can also write me an email to: dbdplus.official@gmail.com");
+		title.setTextFill(new Color(1, 1, 1, 1));
+		title.setPadding(new Insets(25, 25, 0, 25));
+		HBox bottom = new HBox();
+		Button send = new Button("send");
+		Button close = new Button("close");
+		send.setPrefSize(65, 30);
+		close.setPrefSize(65, 30);
+		HBox.setMargin(send, new Insets(10,10,10,10));
+		HBox.setMargin(close, new Insets(10,10,10,10));
+		bottom.setAlignment(Pos.CENTER_RIGHT);
+		send.setOnMouseClicked(e -> sendFeedback());
+		close.setOnMouseClicked(e -> closeFeedback());
+		bottom.getChildren().addAll(close, send);
+		BorderPane.setMargin(feedback, new Insets(25, 25, 25, 25));
+		div.setBottom(bottom);
+		div.setCenter(feedback);
+		div.setTop(title);
+		
+		Scene scene = new Scene(div, 550, 400);
+		commentWindow.getIcons().add(getImage("dbd_icon.png"));
+		commentWindow.setTitle("Feedback");
+		commentWindow.setScene(scene);
+		commentWindow.show();
+	}
+	
+	public void sendFeedback() {
+		Log.out("Sending Feedback...");
+		 URL link;
+		try {
+			String text = feedback.getText().replace("\n", "_").replace("\r", "_").replace(" ", "_").trim();
+			Log.out("Trying to send: '" + text + "'");
+			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true&username="+System.getProperty("user.name")+"&feedback=true&comment=" + text);
+			BufferedReader site = new BufferedReader(new InputStreamReader(link.openStream()));
+	        site.close();
+	        Log.out("Feedback has been successfully send!");
+	        Alert al = new Alert(Alert.AlertType.INFORMATION, "Thank you for your feedback. \n I received your feedback and will see what I can do.");
+			al.setTitle("Feedback send");
+			al.showAndWait();
+	        
+		} catch (MalformedURLException e) {
+			Log.out("IO Exception to check for new app version to download.");
+			Alert al = new Alert(Alert.AlertType.ERROR, "An error occurred. It may work at the second try.");
+			al.setTitle("Unknown Error occured");
+			al.showAndWait();
+		} catch (IOException e) {
+			Log.out("IO Exception for comment feedback occurred.");
+			Alert al = new Alert(Alert.AlertType.ERROR, "An error occurred. It may work at the second try.");
+			al.setTitle("Unknown Error occured");
+			al.showAndWait();
+		}
+		closeFeedback();
+	}
+	
+	public void closeFeedback() {
+		commentWindow.close();
+	}
+	
+	public void openSteamProfile() {
+		Log.out("Trying to open URL: " + killerSteamURL);
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+			try {
+		    Desktop.getDesktop().browse(new URI(killerSteamURL));
+			} catch (IOException | URISyntaxException e) {
+				Log.out("Failed to open killer profile");
+			}
+		}
+	}
+	
+	public void mouseKillerPicEnter() {
+		oldShadow = (DropShadow) killerPic.getEffect();
+		DropShadow ds = new DropShadow();
+		ds.setColor(Color.rgb(50, 50, 255));
+		setShadow(killerPic, ds);
+	}
+	
+	public void mouseKillerPicExit() {
+		setShadow(killerPic, oldShadow);
+	}
+	
+	public void showSkillCheckKey() {
+		setKeyWindow = new Stage();
+		BorderPane div = new BorderPane();
+		Text desc = new Text("Type your preferred action key into the field below: ");
+		desc.setFill(Color.rgb(255, 255, 255));
+		TextField input = new TextField();
+		input.setOnKeyReleased(e -> setMaxInputLength(input));
+		input.setMaxSize(50, 25);
+		input.setAlignment(Pos.CENTER);
+		input.setPromptText("KEY");
+		div.setStyle("-fx-background-color: #111");
+		HBox bottom = new HBox();
+		Button send = new Button("ok");
+		Button close = new Button("close");
+		bottom.setAlignment(Pos.CENTER_RIGHT);
+		send.setOnMouseClicked(e -> setSkillCheckKey(input.getText()));
+		close.setOnMouseClicked(e -> setKeyWindow.close());
+		send.setPrefSize(65, 30);
+		close.setPrefSize(65, 30);
+		HBox.setMargin(send, new Insets(10,10,10,10));
+		HBox.setMargin(close, new Insets(10,10,10,10));
+		bottom.getChildren().addAll(close, send);
+		div.setBottom(bottom);
+		div.setCenter(input);
+		div.setTop(desc);
+		BorderPane.setAlignment(desc, Pos.CENTER);
+		
+		Scene scene = new Scene(div, 350, 200);
+		setKeyWindow.getIcons().add(getImage("dbd_icon.png"));
+		setKeyWindow.setTitle("Feedback");
+		setKeyWindow.setScene(scene);
+		setKeyWindow.show();
+	}
+	
+	public void setMaxInputLength(TextField in) {
+		if (in.getText().length() >= 1) {
+			in.setText(in.getText().charAt(0)+"");
+			in.positionCaret(1);
+		}
+	}
+	
+	public void setSkillCheckKey(String in) {
+		if (in.length() > 0 && in.charAt(0) != ' ') {
+			skillCheckLetter = in.charAt(0);
+			Log.out("SkillCheck keypress set to '" + skillCheckLetter + "'");
+		} else {
+			skillCheckLetter = ' ';
+			Log.out("SkillCheck keypress set to 'SPACE'");
+		}
+		config.skillCheckLetter = skillCheckLetter;
+		if (skillCheckLetter == ' ') {
+			input.input.ki.wVk = new WinDef.WORD(KeyEvent.VK_SPACE);
+		} else {
+			input.input.ki.wVk = new WinDef.WORD(Character.toUpperCase(skillCheckLetter)); // Set Key
+		}
+		config.save();
+		updateLetterMenu();
+		setKeyWindow.close();
+	}
+	
+	public void loadPerformSkillChecks() {
+		skillCheckMenuItem = (CheckMenuItem) loader.getNamespace().get("performSkillChecks");
+		skillCheckMenuItem.setSelected(config.performSkillchecks);
+		if (config.performSkillchecks) {
+			Log.out("Perform Auto-Skillchecks: ON");
+		} else {
+			Log.out("Perform Auto-Skillchecks: OFF");
+		}
+		updateLetterMenu();
+	}
+	
+	public void updateLetterMenu() {
+		String letter = "";
+		if (config.skillCheckLetter == ' ') {
+			letter = "SPACE";
+		} else {
+			letter = config.skillCheckLetter+"";
+		}
+		MenuItem skillCheckLetterMenuItem = (MenuItem) loader.getNamespace().get("performSkillLetter");
+		skillCheckLetterMenuItem.setText("Set key to press (" + letter + ")");
+	}
+	
+	public void togglePerformSkillChecks() {
+		if (config.performSkillchecks) {
+			Log.out("Perform Auto-Skillchecks: OFF");
+			config.performSkillchecks = false;
+			config.save();
+		} else {
+			Log.out("Perform Auto-Skillchecks: ON");
+			config.performSkillchecks = true;
+			config.save();
+		}
+	}
+	
 	public void setLoadTheme() {
-		Runtime.scene.getStylesheets().add(Runtime.config.selectedTheme);
+		if (Runtime.config.selectedTheme != null && !Runtime.config.selectedTheme.equals("")) {
+			Runtime.scene.getStylesheets().add(Runtime.config.selectedTheme);
+		} else {
+			Log.out("Failed to load selected theme. Setting to dark-theme...");
+			setDarkTheme();
+		}
 		Log.out("Loaded selected theme.");
 	}
 	
@@ -275,11 +499,40 @@ public class Runtime extends Application {
 		Runtime.config.save();
 	}
 	
-	public void checkForUpdate() {
+	public void checkForUpdateFromMenu() {
+		String version = checkForUpdate();
+		Alert al = new Alert(Alert.AlertType.INFORMATION, "New Version found: " + version + " \n \n Click OK to update or X to cancel.");
+		al.setTitle("Update detected");
+		al.showAndWait();
+		if (al.getResult() != null) {
+			downloadNewVersion();
+		}
+	}
+	
+	public void showPatchnotes() {
+		Alert al = new Alert(Alert.AlertType.INFORMATION, "Version 1.5 \n "
+				+ "\n Full Patchnotes on: https://github.com/MrPifo/DBD-Plus"
+				+ "\n - Added Auto-Skillcheck feature (Experimental)"
+				+ "\n - Added ability to see Killer Steam-Profile in lobby"
+				+ "\n - Added Exitgate action indication"
+				+ "\n - Added Totem action indication"
+				+ "\n - Added Feedback feature"
+				+ "\n - Added helpful menus"
+				+ "\n - Added Hatch spawn indication"
+				+ "\n - New 'Chasing Survivor' icon"
+				+ "\n - Optimized program size"
+				+ "\n - Removed unecessary code"
+				+ "\n - Bufixes");
+		al.setTitle("Patchnotes");
+		al.showAndWait();
+	}
+	
+	public String checkForUpdate() {
 		Log.out("Searching for new version...");
 		 URL link;
 		try {
-			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true");
+			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true&username="+System.getProperty("user.name"));
+			Log.out(link);
 			BufferedReader site = new BufferedReader(new InputStreamReader(link.openStream()));
 			String version = site.readLine().trim();
 	        site.close();
@@ -290,11 +543,13 @@ public class Runtime extends Application {
 	        	Log.out("New version to download avialable!");
 	        	Runtime.appVersionText.setText("new version avialable: " + version);
 	        }
+	        return version;
 		} catch (MalformedURLException e) {
 			Log.out("Couldn't check for new app version to download.");
 		} catch (IOException e) {
 			Log.out("IO Exception to check for new app version to download.");
 		}
+		return "";
 	}
 	
 	public void downloadNewVersion() {
@@ -512,13 +767,22 @@ public class Runtime extends Application {
 		input.input.ki.wScan = new WinDef.WORD(0);
 		input.input.ki.time = new WinDef.DWORD(0);
 		input.input.ki.dwExtraInfo = new BaseTSD.ULONG_PTR(0);
-		input.input.ki.wVk = new WinDef.WORD(' '); // 0x41
+		input.input.ki.wVk = new WinDef.WORD(skillCheckLetter); // Set Key
 	}
 
 	public static void hardPress(char letter) {
-		input.input.ki.dwFlags = new WinDef.DWORD(0); // keydown
+		if (letter == ' ') {
+			input.input.ki.wVk = new WinDef.WORD(KeyEvent.VK_SPACE);
+		} else {
+			input.input.ki.wVk = new WinDef.WORD(KeyEvent.getKeyCodeForChar(letter)); // Set Key
+		}
+		
+		input.input.ki.dwFlags = new WinDef.DWORD(0); // Press Keydown
 		User32.INSTANCE.SendInput(new WinDef.DWORD(1), (WinUser.INPUT[]) input.toArray(1), input.size());
-		Log.out("HARDKEY PRESSED " + letter);
+		
+		input.input.ki.dwFlags = new WinDef.DWORD(2); // Release Keyup
+		User32.INSTANCE.SendInput(new WinDef.DWORD(1), (WinUser.INPUT[]) input.toArray(1), input.size());
+		Log.out("HARDKEY PRESSED: '" + letter + "'" + " ID: " + input.input.ki.wVk);
 	}
 	
 	public static void keyPressed(GlobalKeyEvent event) throws InterruptedException, IOException {}

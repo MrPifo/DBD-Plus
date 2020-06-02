@@ -6,10 +6,11 @@ class Player {
 	public boolean isKiller;
 	public int survivorId;
 	public int hooks;
-	public boolean isRepairing;
 	public double borrowedTime;
-	public boolean isEscaped;
+	public boolean hasEscaped;
+	public boolean isInteracting;
 	public String survivorName;
+	public boolean isDead;
 	Player(String name, boolean isKiller) {
 		this.name = name;
 		if (isKiller) {

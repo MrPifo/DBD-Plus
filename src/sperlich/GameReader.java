@@ -1,16 +1,15 @@
 package sperlich;
 
 import javafx.application.Platform;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.*;
 import java.nio.charset.StandardCharsets;
-import javax.swing.Timer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class GameReader extends Thread {
 	String searchKiller = "GameFlow: (BP_Menu_Slasher";
@@ -22,7 +21,6 @@ public class GameReader extends Thread {
 	String searchWindowVaults = "ProceduralLevel:PersistentLevel.WindowStandard_C_";
 	String showSkillCheck = "Investigation: HudView::ShowSkillCheck";
 	String hideSkillCheck = "Investigation: HudView::HideSkillCheck";
-	String skillCheckProgressInfo = "HudView::UpdateSkillCheckProgress";
 	String searchTotem = "[CleanseTotem][BP_TotemBase_C_";
 	String interactionEnter = "[==> Interaction Enter]";
 	String interactionExit = "[<== Interaction Exit]";
@@ -35,7 +33,7 @@ public class GameReader extends Thread {
 	String searchShroudSeperation = "Shroud of Separation";
 	String shroudSeperationSurvivor = "Shroud of Binding";
 	String gameClosed = "LogExit: Exiting.";
-	String searchBloodPoints = "Bloodpoints Value: ";
+	String searchBloodPoints = "GameFlow: WriteGameEndStats: Skulls:";
 	// PERKS
 	String noed = "Originating Effect: No_One_Escapes_Death";
 	String ruin = "Originating Effect: Hex_Ruin";
@@ -116,19 +114,24 @@ public class GameReader extends Thread {
 	String searchSurvivorLooting = "Interaction: Verbose: [OpenSearchable]";
 	String searchSurvivorHealOther = "Interaction: Verbose: [HealOther";
 	String searchSurvivorSelfcare = "Interaction: Verbose: [SelfHealNoMedkit]";
+	String searchSurvivorExitEscape = "Verbose: [OpenEscape]";
 	String borrowedTime = " Originating Effect: BorrowedTime";
 	String dStrike = "Originating Effect: DecisiveStrike";
 	String borrowedTimeInit = "StatusEffect::Multicast_InitializeStatusEffect";
 	String searchPlayerName = " playerName:";
 	String playerEscaped = "[EscapeMap]";
+	String searchHatchSpawned = "Sequential Loading of SoundBank Hatch";
+	String searchPlayerPosition = "StopSnapping Final Location (";
+	String searchActionComplete = "[<!> Charge Complete Received]";
+	String searchGenComplete = "Investigation: HudMatchEventsContextComponent::OnRemainingGeneratorCountChanged:";
+	String searchSteamId = "[FOnlineSessionMirrors::AddSessionPlayer] Session:GameSession PlayerId:";
 	String lastInteractionEnterLine;
+	int totalRepairedGens;
 	int camperPickedUpLine;
 	int camperDropLine;
 	int camperEnterHookLine;
 	String[] killerPerks = new String[4];
 	public static boolean playerIsIngame;
-	public static boolean skillCheckActive;
-	public static boolean skillCheckActionPerformed;
 	public static boolean noedActive;
 	public static boolean ruinActive;
 	public int foundGameStarts;
@@ -146,21 +149,19 @@ public class GameReader extends Thread {
 	public int lastGenBlockLine;
 	public int currentKillerId;
 	public int oldKillerId;
-	public double totalBloodPoints;
+	public int totalBloodPoints;
 	public String valueLine;
 	public double currentValue;
-	public double skillAreaLength;
-	public double skillAreaStart;
-	public double skillBonusAreaLength;
 	public static double loadingProgress;
-	public String skillCheckKeyHit;
 	public int updateDelta;
 	public boolean stopSleep;
-	public int matchStartTime;
+	public Date logOpenDateTime = null;
+	public Date logServerTime = null;
+	public Date matchStartTime;
+	public Date currentTime;
+	public long timeDifference;
 	public int matchTime;
 	public Timer timer;
-	public Timer retryTimer;
-	public Timer skipTimer;
 	public int totalPalletPullDowns;
 	public boolean spiritFuryDetected;
 	public int thrownPallets;
@@ -174,28 +175,28 @@ public class GameReader extends Thread {
 	public boolean hudActive = false;
 	public boolean deactiveSpiritFuryDetection;
 	public boolean gameIsClosed = false;
+	public boolean skillCheckActive = false;
 	public static boolean loadingFinished;
+	public boolean matchHasStarted;
 	public ArrayList<Player> players = new ArrayList<Player>();
+	public Player lastPlayerInteracting;
 	public int lastEndLine;
 	public static boolean skip;
+	public int errorDebug;
+	public int currentMatchDuration;
+	public int moriedSurvivors;
+	public boolean hatchSpawned;
+	public Thread skillCheck;
+	public boolean gameCrashed;
+	public String lastSteamId;
+	public int customFound;
+	public static String killerSteamId;
 			
 	String path = System.getProperty("user.home").replaceAll("\\\\", "/")+"/AppData/Local/DeadByDaylight/Saved/Logs/DeadByDaylight.log";
 
 	public void initialize() throws InterruptedException {
 		Log.out("GameReader successfully started.");
-		sleep(2000);
-		retryTimer = new Timer(1000, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				try {
-					initialize();
-				} catch (InterruptedException e) {
-				}
-			}
-		});
-		retryTimer.setInitialDelay(1000);
-		retryTimer.start();
-		retryTimer.stop();
+		sleep(1000);
 		Log.out("Searching Logfile At: " + path);
         try {
         	BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), StandardCharsets.UTF_8));
@@ -204,16 +205,17 @@ public class GameReader extends Thread {
 			readLog(reader);
 		} catch (Exception e) {
 			Log.out("An unexpected error occurred!");
+			timer.stop();
+			gameCrashed = true;
 			Runtime.setText(Runtime.killerName, "Unexpected ERROR occurred");
 			Runtime.setImage(Runtime.killerPic, "unknown.png");
 			resetGame();
-			retryTimer.start();
-			currentKillerId = -1;
-			StackTraceElement[] elements = e.getStackTrace();  
+			oldKillerId = -1;
+			initialize();
+			StackTraceElement[] elements = e.getStackTrace();
             for (int iterator=1; iterator<=elements.length; iterator++)  {
-               System.out.println("Class Name:"+elements[iterator-1].getClassName()+" Method Name:"+elements[iterator-1].getMethodName()+" Line Number:"+elements[iterator-1].getLineNumber());
+               Log.out("Class Name:"+elements[iterator-1].getClassName()+" Method Name:"+elements[iterator-1].getMethodName()+" Line Number:"+elements[iterator-1].getLineNumber());
         	}
-            throw new ExceptionHandler("Unexpected error occurred");
         }
 	}
 
@@ -241,7 +243,23 @@ public class GameReader extends Thread {
 					gameIsClosed = true;
 					lastLine = lineCount;
 				}
-				searchKiller(line);
+				if (logServerTime == null && line.indexOf("LogConfig: Applying CVar settings from Section") >= 0) {
+					logServerTime = GameReader.getDateFromTimestamp(getTimestamp(line));
+					timeDifference = (logOpenDateTime.getTime() - logServerTime.getTime())/1000;
+					Log.out("ServerTime: " + logServerTime);
+					Log.out("Calculated Time Difference: " + timeDifference);
+				}
+				if (logOpenDateTime == null && line.indexOf("Log file open,") >= 0) {
+					SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yy HH:mm:ss");
+					//yyyy.MM.dd-HH.mm.ss:SSS3
+					try {
+						logOpenDateTime = formatter.parse(line.substring(line.indexOf(",")+1, line.length()).trim());
+					} catch (ParseException e) { Log.out("Couldn't parse date"); }
+					Log.out("UserTime: " + logOpenDateTime);
+				}
+				searchSteamId(line);
+				searchKiller(line, lineCount);
+				searchBloodPoints(line);
 			}
 			lineCount++;
 		}
@@ -254,6 +272,8 @@ public class GameReader extends Thread {
 		totalLines = lineCount;
 		setKiller(currentKillerId);
 		reader.close();
+		customFound = 0;
+		lastSteamId = null;
 		Log.out("Successfully scanned " + lineCount + " lines.");
 	}
 
@@ -261,20 +281,16 @@ public class GameReader extends Thread {
 		Log.out("Current match status: " + playerIsIngame);
 		String line = "";
 		int lineCount = 0;
-		timer = new Timer(500, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				updateTime();
-			}
-		});
-		timer.setInitialDelay(0);
+		Runnable task = () -> updateTime();
+		timer = new Timer(500, task);
+		
 		while (true) {
 			line = reader.readLine();
 			if (line != null) {
 				loadingProgress++;
 				if (lineCount >= startLineNumber) {
 					line = line.replaceAll("[^\\u0000-\\uFFFF]", "");
-					scanLine(line, lineCount);
+					scanLine(line, lineCount, reader);
 					if (lineCount >= totalLines-25) {
 						if (!loadingFinished) {
 							Log.out("Finished Loading");
@@ -289,16 +305,19 @@ public class GameReader extends Thread {
 				}
 				lineCount++;
 			} else {
-				Thread.sleep(1);
+				if (!skillCheckActive) {
+					Thread.sleep(1);
+				}
 			}
 		}
 	}
 
-	public void scanLine(String line, int lineCount) throws IOException {
+	public void scanLine(String line, int lineCount, BufferedReader reader) throws IOException {
 		checkIfIngame(line, lineCount);
 		matchTime(line, lineCount);
-		searchKiller(line);
+		searchKiller(line, lineCount);
 		setKiller(currentKillerId);
+		searchSteamId(line);
 		if (playerIsIngame) {
 			searchMap(line);
 			searchSurvivorStates(line, lineCount);
@@ -306,10 +325,17 @@ public class GameReader extends Thread {
 			searchKillerPerks(line, lineCount);
 			searchOfferings(line);
 			searchPallets(line, lineCount);
-			searchBloodPoints(line);
 			searchPlayers(line, lineCount);
 			checkSurvivorHookPhases(line, lineCount);
 			searchSurvivorActions(line);
+			searchPlayerPositions(line);
+			searchOthers(line);
+			searchBloodPoints(line);
+			searchSkillCheck(line, lineCount, reader);
+			if (gameCrashed) {
+				
+				gameCrashed = false;
+			}
 		}
 		if (gameIsClosed) {
 			Log.out("Game is closed");
@@ -319,6 +345,119 @@ public class GameReader extends Thread {
 		}
 	}
 
+	public void searchSteamId(String line) {
+		if (line.indexOf(searchSteamId) >= 0) {
+			lastSteamId = line.substring(line.indexOf("PlayerId:")+9, line.length()).trim();
+		}
+		if (contains(line, "LogCustomization: ------")) {
+			customFound++;
+			if (customFound > 1) {
+				lastSteamId = null;
+				customFound = 0;
+			}
+		}
+		if (lastSteamId != null && contains(line, "LogCustomization: -->")) {
+			String killer = getKillerByCosmetic(line.substring(line.indexOf(">")+1, line.indexOf("_")+1).trim().toLowerCase());
+			if (!killer.equals("error")) {
+				Log.out("Killer " + killer + " Steam64-Id found: " + lastSteamId);
+				killerSteamId = lastSteamId.substring(lastSteamId.indexOf('|')+1, lastSteamId.length());
+				Runtime.killerSteamURL = "https://steamcommunity.com/profiles/" + killerSteamId;
+				Tooltip t = new Tooltip("Opem Steam-Profile: " + Runtime.killerSteamURL);
+				Tooltip.install(Runtime.killerPic, t);
+				lastSteamId = null;
+			}
+		}
+	}
+	
+	public String getKillerByCosmetic(String line) {
+		// Trapper
+		if (contains(line, "S01_") || contains(line, "TR_")) {
+			return "Trapper";
+		}
+		// Wraith
+		if (contains(line, "Wraith_") || contains(line, "TW")) {
+			return "Wraith";
+		}
+		// Hillbilly
+		if (contains(line, "Hillbilly_") || contains(line, "TC")) {
+			return "Hillbilly";
+		}
+		// Nurse
+		if (contains(line, "Nurse_") || contains(line, "TN_")) {
+			return "Nurse";
+		}
+		// Huntress
+		if (contains(line, "BE_")) {
+			return "Huntress";
+		}
+		// Michael Myers
+		if (contains(line, "MM_")) {
+			return "Shape";
+		}
+		// Hag
+		if (contains(line, "HA_")) {
+			return "Hag";
+		}
+		// Doctor
+		if (contains(line, "DO_")) {
+			return "Doctor";
+		}
+		// Leatherface
+		if (contains(line, "CA_")) {
+			return "Leatherface";
+		}
+		// Freddy
+		if (contains(line, "SD_")) {
+			return "Freddy";
+		}
+		// Pig
+		if (contains(line, "FK_")) {
+			return "Pig";
+		}
+		// Clown
+		if (contains(line, "GK_")) {
+			return "Clown";
+		}
+		// Spirit
+		if (contains(line, "HK_")) {
+			return "Spirit";
+		}
+		// Legion
+		if (contains(line, "KK_")) {
+			return "Legion";
+		}
+		// Plague
+		if (contains(line, "MK_")) {
+			return "Plague";
+		}
+		// Ghostface
+		if (contains(line, "OK_")) {
+			return "Ghostface";
+		}
+		// Demogorgon
+		if (contains(line, "QK_")) {
+			return "Demogorgon";
+		}
+		// Oni
+		if (contains(line, "Swedenkiller_") || contains(line, "SW_")) {
+			return "Oni";
+		}
+		// Deathslinger
+		if (contains(line, "UK_") || contains(line, "UkraineKiller_")) {
+			return "Deathslinger";
+		}
+		return "error";
+	}
+	
+	public boolean contains(String src, String search) {
+		src = src.toLowerCase();
+		search = search.toLowerCase();
+		if (src.indexOf(search) >= 0) {
+			return true;
+		}
+		return false;
+	}
+	
 	public void setKiller(int id) {
 		if (oldKillerId != currentKillerId) {
 			Log.out("Killer detected: " + GetKillerById(id));
@@ -382,7 +521,7 @@ public class GameReader extends Thread {
 			endGame();
 		}
 		if (line.indexOf(searchGameEnded) >= 0) {
-			timer.stop();
+			//timer.stop();
 		}
 	}
 
@@ -401,10 +540,17 @@ public class GameReader extends Thread {
 		shadow.setColor(Color.rgb(150, 255, 10));
 		Runtime.setShadow(Runtime.killerPic, shadow);
 		if (timer != null) {
-			timer.start();
+			//timer.start();
 		}
 	}
 
+	public void searchPlayerPositions(String line) {
+		if (line.indexOf(searchPlayerPosition) >= 0) {
+			//String position = line.substring(line.indexOf(searchPlayerPosition) + 29, line.length() - 1);
+			//Log.out("Player " + lastPlayerInteracting.name + ": " + position);
+		}
+	}
+	
 	public void resetGame() {
 		System.out.println("Resetting Match...");
 		playerIsIngame = false;
@@ -416,6 +562,12 @@ public class GameReader extends Thread {
 		maxSpawnedPallets = 0;
 		maxSpawnedWindows = 0;
 		thrownPallets = 0;
+		totalRepairedGens = 0;
+		currentMatchDuration = 0;
+		hatchSpawned = false;
+		matchHasStarted = false;
+		Runtime.toggleNode(Runtime.hatchTitle, false);
+		Runtime.toggleImage(Runtime.hatchImage, false);
 		Runtime.setText(Runtime.killerPlayerName, "Detected Perks: ");
 		killerPerks = new String[4];
 		for (int i = 0; i < Runtime.survivorNames.length; i++) {
@@ -431,7 +583,6 @@ public class GameReader extends Thread {
 		}
 		players = new ArrayList<>();
 		matchTime = 0;
-		matchStartTime = 0;
 		normalDestroyedPallets = 0;
 		Runtime.setText(Runtime.matchStatusTime, "LOBBY");
 		Runtime.setText(Runtime.destroyedPallets, totalDestroyedPallets + "/0");
@@ -442,6 +593,7 @@ public class GameReader extends Thread {
 		Runtime.toggleNode(Runtime.offeringTitle, false);
 		Runtime.toggleNode(Runtime.mapName, false);
 		Runtime.toggleNode(Runtime.mapTitle, false);
+		Runtime.toggleImage(Runtime.hatchImage, false);
 		searchTotems("");
 		for (int i = 0; i < Runtime.killerPerks.length; i++) {
 			if (Runtime.killerPerks[i] != null && Runtime.killerPerkFrames[i] != null) {
@@ -452,7 +604,7 @@ public class GameReader extends Thread {
 			}
 		}
 		if (timer != null) {
-			timer.stop();
+			//timer.stop();
 		}
 	}
 
@@ -467,9 +619,62 @@ public class GameReader extends Thread {
 		DropShadow shadow = new DropShadow();
 		shadow.setColor(Color.rgb(0, 0, 0));
 		Runtime.setShadow(Runtime.killerPic, shadow);
+		playerIsIngame = false;
 	}
 
+	public void searchOthers(String line) {
+		if (line.indexOf(searchGenComplete) >= 0 && currentMatchDuration >= 20) {
+			totalRepairedGens++;
+			Log.out("Repaired Generator: " + totalRepairedGens);
+		}
+		if (getSurvivorCount() >= 4 && !hatchSpawned && totalRepairedGens > getSurvivorsInMap()) {
+			hatchSpawned = true;
+			Runtime.toggleNode(Runtime.hatchTitle, true);
+			Runtime.toggleImage(Runtime.hatchImage, true);
+			Log.out("HATCH SPAWNED");
+		}
+		
+	}
+	
+	public int getSurvivorsAlive() {
+		int total = 0;
+		for (Player p : players) {
+			if (p.isSurvivor && !p.isDead) {
+				total++;
+			}
+		}
+		return total;
+	}
+	
+	public int getSurvivorsInMap() {
+		int total = 0;
+		for (Player p : players) {
+			if (p.isSurvivor && !p.isDead && !p.hasEscaped) {
+				total++;
+			}
+		}
+		return total;
+	}
+	
 	public void searchSurvivorActions(String line) {
+		// Survivor started any interaction
+		if (line.indexOf(interactionEnter) >= 0) {
+			Player p = findPlayer(line);
+			if (p != null) {
+				p.isInteracting = true;
+				lastPlayerInteracting = p;
+			}
+		}
+		// Survivor stopped any interaction
+		if (line.indexOf(interactionExit) >= 0) {
+			Player p = findPlayer(line);
+			if (p != null) {
+				p.isInteracting = false;
+				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], false);
+				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
+			}
+		}
+		// Borrowed Time
 		if (line.indexOf(borrowedTime) >= 0 && line.indexOf(borrowedTimeInit) >= 0) {
 			Player p = findPlayer(line);
 			if (p != null && p.borrowedTime == 0) {
@@ -481,7 +686,7 @@ public class GameReader extends Thread {
 		if (line.indexOf(playerEscaped) >= 0 && line.indexOf(interactionEnter) >= 0) {
 			Player p = findPlayer(line);
 			if (p != null && p.hooks < 3) {
-				p.isEscaped = true;
+				p.hasEscaped = true;
 				Platform.runLater(()-> {
 					Runtime.setImage(Runtime.deadSymbols[p.survivorId], "escaped.png");
 					Runtime.deadSymbols[p.survivorId].setVisible(true);
@@ -512,7 +717,6 @@ public class GameReader extends Thread {
 		if (line.indexOf(searchSurvivorRepair) >= 0 && line.indexOf(interactionEnter) >= 0) {
 			Player p = findPlayer(line);
 			if (p != null) {
-				p.isRepairing = true;
 				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
 				Runtime.setImage(Runtime.actionIcons[p.survivorId], "action_repair.png");
 				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], true);
@@ -522,7 +726,6 @@ public class GameReader extends Thread {
 		if (line.indexOf(searchSurvivorRepair) >= 0 && line.indexOf(interactionExit) >= 0) {
 			Player p = findPlayer(line);
 			if (p != null) {
-				p.isRepairing = false;
 				Log.out(p.name + " stopped repairing");
 				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], false);
 				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
@@ -646,6 +849,42 @@ public class GameReader extends Thread {
 				Log.out(p.name + " stopped chasing.");
 				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], false);
 				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
+			}
+		}
+		// Opening Exit Gate
+		if ((line.indexOf(searchSurvivorExitEscape) >= 0) && line.indexOf(interactionEnter) >= 0) {
+			Player p = findPlayer(line);
+			if (p != null) {
+				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
+				Runtime.setImage(Runtime.actionIcons[p.survivorId], "action_exitgate.png");
+				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], true);
+				Log.out(p.name + " started opening exit gate");
+			}
+		}
+		if ((line.indexOf(searchSurvivorExitEscape) >= 0) && line.indexOf(interactionExit) >= 0) {
+			Player p = findPlayer(line);
+			if (p != null) {
+				Log.out(p.name + " stopped opening exit gate");
+				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], false);
+				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
+			}
+		}
+		// Cleansing Totem
+		if ((line.indexOf("[CleanseTotem]") >= 0) && line.indexOf(interactionEnter) >= 0) {
+			Player p = findPlayer(line);
+			if (p != null) {
+				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
+				Runtime.setImage(Runtime.actionIcons[p.survivorId], "totem.png");
+				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], true);
+				Log.out(p.name + " started cleansing a totem");
+			}
+		}
+		if ((line.indexOf("[CleanseTotem]") >= 0) && line.indexOf(interactionExit) >= 0) {
+			Player p = findPlayer(line);
+			if (p != null) {
+				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], false);
+				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
+				Log.out(p.name + " stopped cleansing a totem");
 			}
 		}
 	}
@@ -792,15 +1031,33 @@ public class GameReader extends Thread {
 	public void searchBloodPoints(String line) {
 		if (line.indexOf(searchBloodPoints) >= 0) {
 			try {
-				double points = Double.parseDouble(line.substring(line.lastIndexOf(":") + 1, line.length()).trim());
-				totalBloodPoints += points;
-				// System.out.println(totalBloodPoints);
+				String _pointsIndex = "BloodPoints:";
+				String _points = line.substring(line.indexOf(_pointsIndex) + _pointsIndex.length(), line.indexOf("FearTokens")).trim();
+				totalBloodPoints += Integer.parseInt(_points);
+				Runtime.totalBloodpoints.setText(totalBloodPoints+"");
+				Log.out("Total earned bloodpoints: " + totalBloodPoints);
 			} catch (NumberFormatException e) {
-
+				
 			}
 		}
 	}
 
+	public static String getTimestamp(String line) {
+		String time = line.substring(line.indexOf('[')+1, line.indexOf(']'));
+		return time;
+	}
+	
+	public static Date getDateFromTimestamp(String time) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss:SSS");
+		try {
+			Date date = formatter.parse(time);
+			return date;
+		} catch (ParseException e) {
+			Log.out("Couldn't parse date");
+		}
+		return null;
+	}
+	
 	public void searchPallets(String line, int lineCount) {
 		if ((line.indexOf(palletPullDownR) >= 0 || line.indexOf(palletPullDownL) >= 0
 				|| line.indexOf(palletPullDownRunningR) >= 0 || line.indexOf(palletPullDownRunningL) >= 0)
@@ -869,7 +1126,7 @@ public class GameReader extends Thread {
 		return new Player("error");
 	}
 	
-	public void searchKiller(String line) {
+	public void searchKiller(String line, int numb) {
 		if (line.indexOf(searchKiller) >= 0) {
 			// System.out.println(line);
 			int index = line.indexOf(searchKiller);
@@ -925,73 +1182,26 @@ public class GameReader extends Thread {
 		}
 	}
 
-	public void searchSkillCheck(String line, int numb) {
-		if (line != null) {
-			if (line.indexOf(showSkillCheck) >= 0) {
-				startSkillCheckCount++;
-				skillCheckStartLine = numb;
-			}
-			if (line.indexOf(hideSkillCheck) >= 0) {
-				hideSkillCheckCount++;
-			}
-		}
-	}
-
-	public void startSkillCheck(String line) {
-		String[] strings = line.split(",");
-		skillCheckKeyHit = strings[1].replace("keyText=", "").trim();
-		skillAreaStart = Math.round(Double.parseDouble(strings[2].replace("hitAreaStart=", "").trim()) * 10000.0)
-				/ 10000.0;
-		skillAreaLength = Math.round(Double.parseDouble(strings[3].replace("hitAreaLength=", "").trim()) * 10000.0)
-				/ 10000.0;
-		skillBonusAreaLength = Math
-				.round(Double.parseDouble(strings[4].replace("bonusAreaLength=", "").trim()) * 10000.0) / 10000.0;
-		Log.out("Skillcheck detected: " + skillCheckKeyHit + ", HitAreaStart: " + skillAreaStart
-				+ ", HitAreaLength: " + skillAreaLength + ", HitAreaLength: " + skillAreaLength + ", bonusAreaLength: "
-				+ skillBonusAreaLength);
-		skillCheckActive = true;
-		skillCheckActionPerformed = false;
-		stopSleep = true;
-		//Main.skillCheckBar.setVisible(true);
-		//Main.toggleText(Main.skillCheckText, true);
-	}
-
-	public void endSkillCheck() {
-		skillAreaStart = 0;
-		skillAreaLength = 0;
-		skillBonusAreaLength = 0;
-		skillCheckActive = false;
-		//Main.skillCheckBar.setVisible(false);
-		//Main.toggleText(Main.skillCheckText, false);
-		stopSleep = false;
-		// System.out.println("End Of Skillcheck.");
-	}
-
-	public void processSkillCheck(String line) throws ExceptionHandler {
-		// System.out.print("Starts: " + startSkillCheckCount + " end: " +
-		// hideSkillCheckCount);
-		valueLine = line;
+	public void searchSkillCheck(String line, int numb, BufferedReader reader) {
 		if (line.indexOf(showSkillCheck) >= 0) {
-			startSkillCheck(line);
-		} else if (line.indexOf(hideSkillCheck) >= 0) {
-			endSkillCheck();
+			startSkillCheckCount++;
+			skillCheckStartLine = numb;
+			skillCheckActive = true;
+			if (numb >= totalLines && Runtime.config.performSkillchecks) {
+				skillCheck = new Thread(new SkillCheck(reader, line) {
+					@Override
+					public void run() {}
+				});
+				skillCheck.start();
+			}
 		}
-		if (skillCheckActive) {
-			if (valueLine.indexOf(skillCheckProgressInfo) >= 0) {
-				valueLine = (valueLine.substring(valueLine.indexOf("value="), valueLine.length()));
-				valueLine = valueLine.substring(6, valueLine.length());
-				try {
-					currentValue = Double.parseDouble(valueLine.substring(0, valueLine.indexOf(',')));
-				} catch (NumberFormatException e) {
-					throw new ExceptionHandler("Couldn't parse skillcheck value");
-				}
+		if (line.indexOf(hideSkillCheck) >= 0) {
+			skillCheckActive = false;
+			hideSkillCheckCount++;
+			if (skillCheck != null) {
+				skillCheck.interrupt();
+				skillCheck = null;
 			}
-			// System.out.println(currentValue);
-			if (currentValue >= skillAreaStart) {
-				// Main.hardPress(' ');
-				endSkillCheck();
-			}
-			//Main.skillCheckBar.setProgress(currentValue);
 		}
 	}
 
@@ -1144,19 +1354,11 @@ public class GameReader extends Thread {
 	}
 
 	public void matchTime(String line, int lineCount) {
-		if (line.indexOf(gameStartCamAnimationEnd) >= 0 && line.length() >= 24) {
+		if (!matchHasStarted && line.indexOf(gameStartCamAnimationEnd) >= 0 && line.length() > 24) {
 			try {
-				int days = Integer.parseInt(line.substring(9, 11));
-				int hours = Integer.parseInt(line.substring(12, 14));
-				if (hours >= 24)
-					hours = hours - 24;
-				int minutes = Integer.parseInt(line.substring(15, 17));
-				int seconds = Integer.parseInt(line.substring(18, 20));
-				int duration = (days * 24 * 60 * 60) + (hours * 60 * 60) + (minutes * 60) + seconds + (60 * 60) * 2;
-				matchStartTime = duration - 2;
-			} catch (NumberFormatException e) {
-
-			}
+				matchStartTime = GameReader.getDateFromTimestamp(getTimestamp(line));
+				matchHasStarted = true;
+			} catch (Exception e) {}
 		}
 	}
 
@@ -1173,9 +1375,9 @@ public class GameReader extends Thread {
 				p.hooks++;
 				Runtime.setText(Runtime.totalHooks[p.survivorId], "Hookstate: " + p.hooks);
 				Log.out(lineCount + ": Survivor " + p.name + " hooks.");
-				lockForTime(1);
 				if (p.hooks >= 3) {
 					p.hooks = 3;
+					p.isDead = true;
 					Platform.runLater(()-> {
 						Runtime.setImage(Runtime.deadSymbols[p.survivorId], "dead_symbol.png");
 						Runtime.deadSymbols[p.survivorId].setVisible(true);
@@ -1189,6 +1391,7 @@ public class GameReader extends Thread {
 			Player p = findSurvivor(line);
 			if (p != null) {
 				p.hooks = 3;
+				p.isDead = true;
 				Platform.runLater(()-> {
 					Runtime.setImage(Runtime.deadSymbols[p.survivorId], "dead_symbol.png");
 					Runtime.deadSymbols[p.survivorId].setVisible(true);
@@ -1197,19 +1400,15 @@ public class GameReader extends Thread {
 				});
 			}
 		}
+		
 	}
 	
 	public void updateTime() {
-		if (matchStartTime > 0) {
-			Calendar calendar = Calendar.getInstance();
-			int cdays = calendar.get(Calendar.DAY_OF_MONTH);
-			int chours = calendar.get(Calendar.HOUR_OF_DAY);
-			int cminutes = calendar.get(Calendar.MINUTE);
-			int cseconds = calendar.get(Calendar.SECOND);
-			int current = (cdays * 24 * 60 * 60) + (chours * 60 * 60) + (cminutes * 60) + cseconds;
-			String time = secondsToTime(current - matchStartTime);
+		if (playerIsIngame && matchHasStarted && matchStartTime != null) {
+			currentTime = new Date();
+			currentMatchDuration = (int)((currentTime.getTime() - matchStartTime.getTime())/1000-timeDifference);
+			String time = secondsToTime(currentMatchDuration);
 			Runtime.setText(Runtime.matchStatusTime, time);
-			
 			for (Player p : players) {
 				if (p.borrowedTime > 0) {
 					p.borrowedTime -= 0.5;
@@ -1220,11 +1419,13 @@ public class GameReader extends Thread {
 					}
 				}
 			}
-		} else {
+		} else if (playerIsIngame && matchHasStarted == false) {
 			Runtime.setText(Runtime.matchStatusTime, Runtime.matchStatusTime.getText()+".");
 			if (Runtime.matchStatusTime.getText().length() > 10) {
 				Runtime.setText(Runtime.matchStatusTime, "Loading");
 			}
+		} else {
+			Runtime.setText(Runtime.matchStatusTime, "Lobby");
 		}
 	}
 
@@ -1374,18 +1575,5 @@ public class GameReader extends Thread {
 				}
 			}
 		}
-	}
-
-	public void lockForTime(int time) {
-		skip = true;
-		skipTimer = new Timer(time, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				skip = false;
-			}
-		});
-		skipTimer.setInitialDelay(0);
-		skipTimer.start();
-	}
-	
+	}	
 }
