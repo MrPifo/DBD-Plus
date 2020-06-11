@@ -81,6 +81,15 @@ A list of features this program can achieve:
 
 ## Updates
 
+### 1.6
+
+- Added Donation button so you can support my work.
+- Added Dstrike Timer (Runs for 60s after unhook)
+- Added Disclaimer notification for first login
+- Removed Autoskillchecker (not working)
+- Added action icon when survivor is hooked
+- Bugfixes
+
 ### 1.5
 
 This update adds a lot of new features. So it may happen that there are still some bugs to be expecting. If you have such bugs, then send me under 'Feedback' a comment and describe your bug as detailed as possible.
