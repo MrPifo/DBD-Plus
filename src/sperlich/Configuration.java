@@ -12,6 +12,16 @@ public class Configuration implements Serializable {
 	public String selectedTheme;
 	public boolean performSkillchecks;
 	public char skillCheckLetter;
+	public boolean policy;
+	public boolean overlay = false;
+	public boolean time = true;
+	public boolean totems = true;
+	public boolean pallets = true;
+	public boolean vaults = true;
+	public boolean bloodpoints = true;
+	public boolean map = true;
+	public double overlayOpacity = 0.5f;
+	public boolean allowNetwork;
 
 	public void save() {
 		try {
@@ -33,6 +43,16 @@ public class Configuration implements Serializable {
 			Runtime.config = new Configuration();
 			Runtime.config.performSkillchecks = false;
 			Runtime.config.skillCheckLetter = ' ';
+			Runtime.config.policy = false;
+			Runtime.config.overlay = false;
+			Runtime.config.time = true;
+			Runtime.config.totems = true;
+			Runtime.config.pallets = true;
+			Runtime.config.vaults = true;
+			Runtime.config.bloodpoints = true;
+			Runtime.config.map = true;
+			Runtime.config.overlayOpacity = 0.5f;
+			Runtime.config.allowNetwork = true;
 		}
 	}
 }

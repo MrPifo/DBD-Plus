@@ -20,10 +20,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
@@ -41,6 +45,7 @@ import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lc.kra.system.keyboard.event.GlobalKeyEvent;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.awt.Desktop;
@@ -57,10 +62,10 @@ import java.io.InputStreamReader;
 import java.io.File;
 
 public class Runtime extends Application {
-	public static GameReader game;
-	public static String appVersion = "v1.5";
+	public static String appVersion = "v1.6.2";
 	public static String download = "https://www.sperlich.at/storage/content/DBD%20Plus.jar";
 	public static String downloadPath = System.getProperty("user.dir") + "/DBD Plus.jar";
+	public static String killerSteamURL;
 	public static String lightTheme;
 	public static String darkTheme;
 	public static Thread keyboardThread;
@@ -84,6 +89,7 @@ public class Runtime extends Application {
 	public static Text[] survivorNames = new Text[4];
 	public static Text[] totalHooks = new Text[4];
 	public static Text[] survivorAction = new Text[4];
+	public static Text[] obsessionStatesText = new Text[4];
 	public static ImageView vaultIcon;
 	public static ImageView bodyImage;
 	public static ImageView killerPic;
@@ -98,6 +104,7 @@ public class Runtime extends Application {
 	public static ImageView[] deadSymbols = new ImageView[4];
 	public static ImageView[] actionIcons = new ImageView[4];
 	public static ProgressBar[] survivorBars = new ProgressBar[4];
+	public static ProgressBar[] dstrikeBars = new ProgressBar[4];
 	public static ProgressBar startUpLoadBar;
 	public static ProgressBar downloadProgress;
 	public static HBox totemsBox;
@@ -116,12 +123,20 @@ public class Runtime extends Application {
 	public static Font font;
 	public static Parent root;
 	public static TextArea feedback;
-	public Stage commentWindow;
-	public Stage setKeyWindow;
+	public static Stage commentWindow;
+	public static Stage disclaimerWindow;
+	public static Stage setKeyWindow;
+	public static Stage overlayWindow;
+	public static Stage stage;
 	public static char skillCheckLetter = 'P';
 	public static FXMLLoader loader;
 	public static DropShadow oldShadow;
-	public static String killerSteamURL;
+	public static CheckBox policyCheck;
+	public static Label networkCheck;
+	public static boolean overlayMode;
+	public static Overlay overlay;
+	public static boolean toggleMode;
+	public static Slider opacitySlider;
 
 	public static void main(String[] args) {
 		Log.out("Application started.");
@@ -145,16 +160,14 @@ public class Runtime extends Application {
 		} catch (IOException e1) {
 			Log.out("Failed to load FXMLLoader");
 		}
-		Runtime.scene = new Scene(root, 1000, 600);
+		Runtime.scene = new Scene(root, 1000, 650);
 		stage.setTitle("DBD Plus");
 		stage.setMinHeight(600);
 		stage.setMinWidth(1000);
 		stage.getIcons().add(getImage("dbd_icon.png"));
 		stage.setScene(scene);
 		stage.setResizable(true);
-		stage.setOnCloseRequest(event -> {
-			exitApplication();
-		});
+		stage.setOnCloseRequest(event -> exitApplication());
 		URL css = Runtime.class.getResource("style.css");
 		Runtime.lightTheme = getClass().getResource("light_theme.css").toExternalForm();
 		Runtime.darkTheme = getClass().getResource("dark_theme.css").toExternalForm();
@@ -163,6 +176,9 @@ public class Runtime extends Application {
 			Runtime.config = new Configuration();
 			setDarkTheme();
 		}
+		MenuItem skillChecker = (MenuItem) loader.getNamespace().get("skillChecker");
+		skillChecker.setVisible(false);
+		opacitySlider = (Slider) loader.getNamespace().get("opacitySlider");
 		body = (AnchorPane) root.lookup("#body");
 		killerName = (Text) root.lookup("#killerId");
 		hatchTitle = (Text) root.lookup("#hatchTitle");
@@ -207,9 +223,7 @@ public class Runtime extends Application {
 		killerOffering.setImage(null);
 		destroyedPallets.setText("0/0");
 		totalVaults.setText("0/0");
-		appVersionText.setOnMouseClicked(e -> {
-            downloadNewVersion();
-        });
+		appVersionText.setOnMouseClicked(e -> downloadNewVersion());
 		for (int i = 0; i < 4; i++) {
 			killerPerks[i] = (ImageView) root.lookup("#perk_"+i);
 			killerPerkFrames[i] = (ImageView) root.lookup("#perk_frame"+i);
@@ -229,11 +243,15 @@ public class Runtime extends Application {
 			totalHooks[i] = (Text)root.lookup("#totalHooks"+i);
 			survivorAction[i] = (Text)root.lookup("#survAction"+i);
 			survivorBars[i] = (ProgressBar)root.lookup("#survBar"+i);
+			dstrikeBars[i] = (ProgressBar)root.lookup("#dstrikeBar"+i);
+			obsessionStatesText[i] = (Text)root.lookup("#obsessionStateText"+i);
 			deadSymbols[i] = (ImageView) root.lookup("#survDead"+i);
 			setImage(deadSymbols[i], "dead_symbol.png");
 			deadSymbols[i].setManaged(false);
 			deadSymbols[i].setVisible(false);
 			survivorBars[i].setVisible(false);
+			dstrikeBars[i].setVisible(false);
+			obsessionStatesText[i].setVisible(false);
 		}
 		killerPic.setImage(getImage("unknown.png"));
 		mapName.setVisible(false);
@@ -259,10 +277,14 @@ public class Runtime extends Application {
             }
         };
         Runtime.startUpLoadBar.progressProperty().bind(task.progressProperty());
+        Runtime.config.load();
+        toggleMode = false;
+        toggleScreenOverlay();
+        toggleMode= true;
 		gameReader = new Thread(new GameReader() {
 			@Override
 			public void run() {
-				try { initialize(); } catch (InterruptedException e) {}
+				try { initialize(); } catch (InterruptedException e) { Log.out("Couldn't start GameReader thread!"); }
 			}
 		});
 		gameReader.start();
@@ -273,10 +295,231 @@ public class Runtime extends Application {
 		setLoadTheme();
 		loadPerformSkillChecks();
 		checkForUpdate();
+		config.performSkillchecks = false;
 		stage.show();
+		if (!config.policy) {
+			openDisclaimerPopup();
+		}
 	}
-
-	public Image getImage(String url) {
+	
+	public void toggleScreenOverlay() {
+		boolean switched = false;
+		if (toggleMode) {
+			if (Runtime.config.overlay) {
+				Runtime.config.overlay = false;
+				Runtime.config.save();
+				switched = true;
+			} else {
+				Runtime.config.overlay = true;
+				Runtime.config.save();
+				switched = true;
+			}
+		}
+		if (Runtime.config.overlay) {
+			Log.out("SCREEN OVERLAY: ON");
+			drawScreenOverlay();
+		} else {
+			if (overlay != null) {
+				Log.out("SCREEN OVERLAY: OFF");
+				overlay.stage.close();
+			}
+		}
+		CheckMenuItem overlayMenu = (CheckMenuItem) loader.getNamespace().get("screenOverlay");
+		overlayMenu.setSelected(config.overlay);
+		overlayMenu.setDisable(true);
+		MenuBar menuBar = (MenuBar) loader.getNamespace().get("menuBar");
+		Menu toggleMenu = (Menu) loader.getNamespace().get("toggleMenu");
+		menuBar.getMenus().remove(toggleMenu);
+		if (overlay != null) {
+			overlay.stage.close();
+		}
+		if (!switched) {
+			toggleTime();
+			toggleTotems();
+			togglePallets();
+			toggleVaults();
+			toggleBloodpoints();
+			toggleMap();
+			opacitySlider.setValue(Runtime.config.overlayOpacity*100);
+		}
+	}
+	
+	public void drawScreenOverlay() {
+		overlay = new Overlay();
+		overlay.update();
+	}
+	
+	public static void updateOverlay() {
+		if (overlay != null) {
+			overlay.update();
+		}
+	}
+	
+	public void toggleTime() {
+		if (toggleMode) {
+			if (Runtime.config.time) {
+				Runtime.config.time = false;
+				Runtime.config.save();
+			} else {
+				Runtime.config.time = true;
+				Runtime.config.save();
+			}
+		}
+		if (Runtime.config.time) {
+			Log.out("DISPLAY TIME: ON");
+			toggleNode(Runtime.matchStatusTime, true);
+			if (overlay != null) {
+				toggleNode(overlay.time, true);
+			}
+		} else {
+			Log.out("DISPLAY TIME: OFF");
+			toggleNode(Runtime.matchStatusTime, false);
+			if (overlay != null) {
+				toggleNode(overlay.time, false);
+			}
+		}
+		CheckMenuItem toggler = (CheckMenuItem) loader.getNamespace().get("toggleTime");
+		toggler.setSelected(config.time);
+	}
+	
+	public void toggleTotems() {
+		if (toggleMode) {
+			if (Runtime.config.totems) {
+				Runtime.config.totems = false;
+				Runtime.config.save();
+			} else {
+				Runtime.config.totems = true;
+				Runtime.config.save();
+			}
+		}
+		if (Runtime.config.totems) {
+			Log.out("DISPLAY TOTEMS: ON");
+			toggleNode(Runtime.totemsBox, true);
+			if (overlay != null) {
+				toggleNode(overlay.totemHB, true);
+			}
+		} else {
+			Log.out("DISPLAY TOTEMS: OFF");
+			toggleNode(Runtime.totemsBox, false);
+			if (overlay != null) {
+				toggleNode(overlay.totemHB, false);
+			}
+		}
+		CheckMenuItem toggler = (CheckMenuItem) loader.getNamespace().get("toggleTotems");
+		toggler.setSelected(config.totems);
+	}
+	
+	public void togglePallets() {
+		if (toggleMode) {
+			if (Runtime.config.pallets) {
+				Runtime.config.pallets = false;
+				Runtime.config.save();
+			} else {
+				Runtime.config.pallets = true;
+				Runtime.config.save();
+			}
+		}
+		if (Runtime.config.pallets) {
+			Log.out("DISPLAY PALLETS: ON");
+			toggleNode(Runtime.palletsBox, true);
+			if (overlay != null) {
+				toggleNode(overlay.palletHB, true);
+			}
+		} else {
+			Log.out("DISPLAY PALLETS: OFF");
+			toggleNode(Runtime.palletsBox, false);
+			if (overlay != null) {
+				toggleNode(overlay.palletHB, false);
+			}
+		}
+		CheckMenuItem toggler = (CheckMenuItem) loader.getNamespace().get("togglePallets");
+		toggler.setSelected(config.pallets);
+	}
+	
+	public void toggleVaults() {
+		if (toggleMode) {
+			if (Runtime.config.vaults) {
+				Runtime.config.vaults = false;
+				Runtime.config.save();
+			} else {
+				Runtime.config.vaults = true;
+				Runtime.config.save();
+			}
+		}
+		if (Runtime.config.vaults) {
+			Log.out("DISPLAY VAULTS: ON");
+			toggleNode(Runtime.vaultsBox, true);
+			if (overlay != null) {
+				toggleNode(overlay.vaultHB, true);
+			}
+		} else {
+			Log.out("DISPLAY TIME: OFF");
+			toggleNode(Runtime.vaultsBox, false);
+			if (overlay != null) {
+				toggleNode(overlay.vaultHB, false);
+			}
+		}
+		CheckMenuItem toggler = (CheckMenuItem) loader.getNamespace().get("toggleVaults");
+		toggler.setSelected(config.vaults);
+	}
+	
+	public void toggleBloodpoints() {
+		if (toggleMode) {
+			if (Runtime.config.bloodpoints) {
+				Runtime.config.bloodpoints = false;
+				Runtime.config.save();
+			} else {
+				Runtime.config.bloodpoints = true;
+				Runtime.config.save();
+			}
+		}
+		if (Runtime.config.bloodpoints) {
+			Log.out("DISPLAY BLOODPOINTS: ON");
+			toggleNode(Runtime.bloodpointsBox, true);
+		} else {
+			Log.out("DISPLAY BLOODPOINTS: OFF");
+			toggleNode(Runtime.bloodpointsBox, false);
+		}
+		CheckMenuItem toggler = (CheckMenuItem) loader.getNamespace().get("toggleBloodpoints");
+		toggler.setSelected(config.bloodpoints);
+	}
+	
+	public void toggleMap() {
+		if (toggleMode) {
+			if (Runtime.config.map) {
+				Runtime.config.map = false;
+				Runtime.config.save();
+			} else {
+				Runtime.config.map = true;
+				Runtime.config.save();
+			}
+		}
+		if (Runtime.config.map) {
+			Log.out("DISPLAY MAP: ON");
+			toggleNode(Runtime.mapBox, true);
+			if (overlay != null) {
+				toggleNode(overlay.mapName, true);
+			}
+		} else {
+			Log.out("DISPLAY MAP: OFF");
+			toggleNode(Runtime.mapBox, false);
+			if (overlay != null) {
+				toggleNode(overlay.mapName, false);
+			}
+		}
+		CheckMenuItem toggler = (CheckMenuItem) loader.getNamespace().get("toggleMap");
+		toggler.setSelected(config.map);
+	}
+	
+	public void updateOverlayOpacity() {
+		if (overlay != null) {
+			overlay.stage.setOpacity(opacitySlider.getValue()/100);
+			Runtime.config.overlayOpacity = opacitySlider.getValue()/100;
+			Runtime.config.save();
+		}
+	}
+	
+	public static Image getImage(String url) {
 		URL image = Runtime.class.getResource(url);
 		return new Image(image.toString());
 	}
@@ -318,10 +561,9 @@ public class Runtime extends Application {
 		div.setCenter(feedback);
 		div.setTop(title);
 		
-		Scene scene = new Scene(div, 550, 400);
 		commentWindow.getIcons().add(getImage("dbd_icon.png"));
 		commentWindow.setTitle("Feedback");
-		commentWindow.setScene(scene);
+		commentWindow.setScene(new Scene(div, 550, 400));
 		commentWindow.show();
 	}
 	
@@ -331,7 +573,7 @@ public class Runtime extends Application {
 		try {
 			String text = feedback.getText().replace("\n", "_").replace("\r", "_").replace(" ", "_").trim();
 			Log.out("Trying to send: '" + text + "'");
-			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true&username="+System.getProperty("user.name")+"&feedback=true&comment=" + text);
+			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true&username="+getPcname()+"&feedback=true&comment=" + text);
 			BufferedReader site = new BufferedReader(new InputStreamReader(link.openStream()));
 	        site.close();
 	        Log.out("Feedback has been successfully send!");
@@ -359,13 +601,7 @@ public class Runtime extends Application {
 	
 	public void openSteamProfile() {
 		Log.out("Trying to open URL: " + killerSteamURL);
-		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-			try {
-		    Desktop.getDesktop().browse(new URI(killerSteamURL));
-			} catch (IOException | URISyntaxException e) {
-				Log.out("Failed to open killer profile");
-			}
-		}
+		openWebpage(killerSteamURL);
 	}
 	
 	public void mouseKillerPicEnter() {
@@ -384,17 +620,17 @@ public class Runtime extends Application {
 		BorderPane div = new BorderPane();
 		Text desc = new Text("Type your preferred action key into the field below: ");
 		desc.setFill(Color.rgb(255, 255, 255));
-		TextField input = new TextField();
-		input.setOnKeyReleased(e -> setMaxInputLength(input));
-		input.setMaxSize(50, 25);
-		input.setAlignment(Pos.CENTER);
-		input.setPromptText("KEY");
+		TextField inputField = new TextField();
+		inputField.setOnKeyReleased(e -> setMaxInputLength(inputField));
+		inputField.setMaxSize(50, 25);
+		inputField.setAlignment(Pos.CENTER);
+		inputField.setPromptText("KEY");
 		div.setStyle("-fx-background-color: #111");
 		HBox bottom = new HBox();
 		Button send = new Button("ok");
 		Button close = new Button("close");
 		bottom.setAlignment(Pos.CENTER_RIGHT);
-		send.setOnMouseClicked(e -> setSkillCheckKey(input.getText()));
+		send.setOnMouseClicked(e -> setSkillCheckKey(inputField.getText()));
 		close.setOnMouseClicked(e -> setKeyWindow.close());
 		send.setPrefSize(65, 30);
 		close.setPrefSize(65, 30);
@@ -402,14 +638,13 @@ public class Runtime extends Application {
 		HBox.setMargin(close, new Insets(10,10,10,10));
 		bottom.getChildren().addAll(close, send);
 		div.setBottom(bottom);
-		div.setCenter(input);
+		div.setCenter(inputField);
 		div.setTop(desc);
 		BorderPane.setAlignment(desc, Pos.CENTER);
 		
-		Scene scene = new Scene(div, 350, 200);
 		setKeyWindow.getIcons().add(getImage("dbd_icon.png"));
 		setKeyWindow.setTitle("Feedback");
-		setKeyWindow.setScene(scene);
+		setKeyWindow.setScene(new Scene(div, 350, 200));
 		setKeyWindow.show();
 	}
 	
@@ -510,18 +745,9 @@ public class Runtime extends Application {
 	}
 	
 	public void showPatchnotes() {
-		Alert al = new Alert(Alert.AlertType.INFORMATION, "Version 1.5 \n "
+		Alert al = new Alert(Alert.AlertType.INFORMATION, "Version 1.6.2 \n "
 				+ "\n Full Patchnotes on: https://github.com/MrPifo/DBD-Plus"
-				+ "\n - Added Auto-Skillcheck feature (Experimental)"
-				+ "\n - Added ability to see Killer Steam-Profile in lobby"
-				+ "\n - Added Exitgate action indication"
-				+ "\n - Added Totem action indication"
-				+ "\n - Added Feedback feature"
-				+ "\n - Added helpful menus"
-				+ "\n - Added Hatch spawn indication"
-				+ "\n - New 'Chasing Survivor' icon"
-				+ "\n - Optimized program size"
-				+ "\n - Removed unecessary code"
+				+ "\n - Updated disclaimer and policy for security reasons."
 				+ "\n - Bufixes");
 		al.setTitle("Patchnotes");
 		al.showAndWait();
@@ -529,9 +755,10 @@ public class Runtime extends Application {
 	
 	public String checkForUpdate() {
 		Log.out("Searching for new version...");
-		 URL link;
+		URL link;
 		try {
-			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true&username="+System.getProperty("user.name"));
+			String osName = getPcname();
+			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true&username="+osName);
 			Log.out(link);
 			BufferedReader site = new BufferedReader(new InputStreamReader(link.openStream()));
 			String version = site.readLine().trim();
@@ -550,6 +777,18 @@ public class Runtime extends Application {
 			Log.out("IO Exception to check for new app version to download.");
 		}
 		return "";
+	}
+	
+	public String getPcname() {
+		try {
+		    InetAddress inet = InetAddress.getLocalHost();
+		    String name = inet.getHostName();
+		    name.trim().replaceAll("\\s", "");
+		    return System.getProperty("user.name") + "_UID_" + name;
+		  } catch (Exception e) {
+		    Log.out("Failed getting Hostname.");
+		    return "failed";
+		  }
 	}
 	
 	public void downloadNewVersion() {
@@ -593,7 +832,9 @@ public class Runtime extends Application {
 			Log.out("Application closed.");
 			Thread.sleep(5000);
 			System.exit(0);
-		} catch (IOException | InterruptedException e) {};
+		} catch (IOException | InterruptedException e) {
+			Log.out("Failed to restart program!");
+		}
 	}
 	
 	public void enterDownloadText() {
@@ -604,7 +845,7 @@ public class Runtime extends Application {
 		appVersionText.setFill(mapName.getFill());
 	}
 	
-	public static void setKillerPic(int id) throws ExceptionHandler {
+	public static void setKillerPic(int id) {
 		if (id > 0) {
 			String path = "slasher_" + id + ".png";
 			setImage(killerPic, path);
@@ -632,9 +873,7 @@ public class Runtime extends Application {
 	}
 
 	public static void setProgress(ProgressBar bar, double value) {
-		Platform.runLater(()-> {
-			bar.setProgress(value);
-		});
+		Platform.runLater(()-> bar.setProgress(value));
 	}
 	
 	public static void setImage(ImageView element, String file) {
@@ -672,7 +911,7 @@ public class Runtime extends Application {
 		});
 	}
 
-	public static void playPerkAnimation(String perk, int slot) {
+	public static void playPerkAnimation(int slot) {
 		Platform.runLater(()-> {
 			int startRot = 200;
 			int endRot = 360;
@@ -776,6 +1015,7 @@ public class Runtime extends Application {
 		} else {
 			input.input.ki.wVk = new WinDef.WORD(KeyEvent.getKeyCodeForChar(letter)); // Set Key
 		}
+		input.input.ki.wVk = new WinDef.WORD(KeyEvent.VK_SPACE);
 		
 		input.input.ki.dwFlags = new WinDef.DWORD(0); // Press Keydown
 		User32.INSTANCE.SendInput(new WinDef.DWORD(1), (WinUser.INPUT[]) input.toArray(1), input.size());
@@ -792,4 +1032,106 @@ public class Runtime extends Application {
 	public static void leftMouseButtonPressed() {}
 
 	public static void leftMouseButtonReleased() {}
+	
+	public void openDonationLink() {
+		Log.out("Trying to open Paypal donation link in browser");
+		openWebpage("https://www.paypal.me/dbdplus");
+	}
+	
+	public static void openWebpage(String link) {
+		if (link != null && link.length() > 0) {
+			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+				try {
+					Desktop.getDesktop().browse(new URI(link));
+				} catch (IOException | URISyntaxException e) {
+					Log.out("Failed to open link!");
+		            Alert al = new Alert(Alert.AlertType.ERROR, "Failed to open link with your browser. Try to open the link manually: " + link);
+					al.setTitle("Failed to open link");
+					al.showAndWait();
+				}
+			}
+		} else {
+			Log.out("Failed to open link!");
+            Alert al = new Alert(Alert.AlertType.ERROR, "The given link is null or not avialable: " + link);
+			al.setTitle("Failed to open link");
+			al.showAndWait();
+		}
+	}
+	
+	public void openDisclaimerPopup() {
+		Log.out("Trying to open disclaimer window.");
+		
+		disclaimerWindow = new Stage();
+		BorderPane div = new BorderPane();
+		Label title = new Label("Disclaimer");
+		title.setAlignment(Pos.CENTER);
+		title.setFont(new Font(40));
+		title.setTextFill(Color.WHITE);
+		policyCheck = new CheckBox("I agree that I read the information above, I'm aware of the functions of this program and that I'm using it on my own risk.");
+		policyCheck.setTextFill(Color.WHITE);
+		policyCheck.setPadding(new Insets(30, 30, 30, 30));
+		BorderPane.setAlignment(title, Pos.CENTER);
+		Label content = new Label(""
+				+ "Thank you for downloading DBD-Plus!\n \n"
+				+ "DBD-Plus is an unofficial assistance tool for Dead By Daylight to give you information, which is normally not displayed ingame.  \n"
+				+ "\n ### NOTE ### \n"
+				+ "This program is not a HACK but more of an exploit! Neither does it modify your gamefiles nor interact with your game in any way."
+				+ "This program works based on your deadbydaylight.log file which I just read and compute. \n \n"
+				+ "### Features ###"
+				+ "\n - Show killer in pre-lobby"
+				+ "\n - Detect killer perks (it's not possible to display all)"
+				+ "\n - Show hidden Killer Offerings"
+				+ "\n - See cleansed totems"
+				+ "\n - Survivor interactions and information"
+				+ "\n - Extra information is listed on my Github"
+				+ "\n \n ### Data Security ### \n"
+				+ "I consent that background userdata is send to a webserver everytime the program opens for monitoring reasons and for version checking. "
+				+ "\n [OS Username & Computername] is required to distinguish users"
+				+ "\n \n ### File Saving ### \n"
+				+ "A folder is created within your default C:/ named DBDPlus with a config and logfile"
+				+ "\n \n ### Limitations ###"
+				+ "\n I can only work with information which is logged in the logfile. So some features are not possible to be implemented!"
+				+ "\n \n Be sure to regularly update and check the patchnotes for new features!"
+				+ "\n If you want to support my work, you can send me money under the 'Support Me' menu."
+				+ "\n You can email me under: dbdplus.official@gmail.com"
+				);
+		content.setWrapText(true);
+		content.setFont(new Font(15));
+		content.setTextFill(Color.WHITE);
+		content.setPadding(new Insets(25, 25, 25, 25));
+		div.setStyle("-fx-background-color: #111");
+		HBox bottom = new HBox();
+		Button ok = new Button("okay");
+		ok.setPrefSize(65, 30);
+		HBox.setMargin(ok, new Insets(10,10,10,10));
+		bottom.setAlignment(Pos.CENTER_RIGHT);
+		ok.setOnMouseClicked(e -> {
+			if (policyCheck.isSelected()) {
+				config.policy = true;
+				config.save();
+				config.load();
+				if (config.policy) {
+					disclaimerWindow.close();
+				}
+			} else {
+				policyCheck.setTextFill(Color.rgb(255, 100, 100));
+			}
+		});
+		VBox center = new VBox();
+		center.getChildren().addAll(content, policyCheck);
+		center.setAlignment(Pos.CENTER);
+		bottom.getChildren().addAll(ok);
+		BorderPane.setMargin(content, new Insets(25, 25, 25, 25));
+		div.setBottom(bottom);
+		div.setCenter(center);
+		div.setTop(title);
+		disclaimerWindow.setOnCloseRequest(e -> {
+			openDisclaimerPopup();
+		});
+		
+		disclaimerWindow.getIcons().add(getImage("dbd_icon.png"));
+		disclaimerWindow.setTitle("Disclaimer");
+		disclaimerWindow.setScene(new Scene(div, 1000, 1000));
+		disclaimerWindow.show();
+	}
 }

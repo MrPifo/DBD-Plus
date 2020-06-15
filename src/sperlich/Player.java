@@ -11,6 +11,10 @@ class Player {
 	public boolean isInteracting;
 	public String survivorName;
 	public boolean isDead;
+	public int obessionState;
+	public boolean isHooked;
+	public double dstrikeTime;
+	
 	Player(String name, boolean isKiller) {
 		this.name = name;
 		if (isKiller) {

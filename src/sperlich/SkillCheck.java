@@ -29,7 +29,9 @@ public class SkillCheck extends Thread {
 		startSkillCheck(line);
 		try {
 			processSkillCheck();
-		} catch (IOException | InterruptedException e) {}
+		} catch (IOException | InterruptedException e) {
+			Log.out("An error occurred while processing the skillcheck!");
+		}
 	}
 	
 	public void startSkillCheck(String line) {
@@ -78,25 +80,28 @@ public class SkillCheck extends Thread {
 		if (totalTime <= Math.round(areaStart)*1000.0) {
 			Log.out("WARNING: Hit-Time calculation is lower than hitAreaStart! Setting to areaStart.");
 			totalTime = Math.round(areaStart*1000.0);
-			Log.out("New calculated Hit-Time: " + totalTime);
+			//Log.out("New calculated Hit-Time: " + totalTime);
 			blockSecondMethod = true;
 		}
+		totalTime = (int)Math.floor(areaStart*1000)-100;
+		Log.out("New calculated Hit-Time: " + totalTime);
 		
 		Runnable t = () -> hitSkillCheck();
 		timer = new Timer((int)totalTime, t);
-		for (int i=0; i < 1000 && !isHit && !blockSecondMethod; i++) {
+		
+		/*while (!isHit) {
 			try {
-				sleep(1);
 				String valueLine = reader.readLine();
 				if (valueLine != null && valueLine.indexOf(progressInfo) >= 0) {
-					if (getSkillCheckValue(valueLine) >= (areaStart+areaLength/2) && !isHit) {
+					if (getSkillCheckValue(valueLine) >= areaStart && !isHit) {
 						Log.out("Skillcheck performed with backup method.");
+						isHit = true;
 						hitSkillCheck();
 						break;
 					}
 				}
 			} catch (IOException e) {}
-		}
+		}*/
 	}
 	
 	public double getSkillCheckValue(String line) {
@@ -110,6 +115,8 @@ public class SkillCheck extends Thread {
 				throw new ExceptionHandler("Couldn't parse skillcheck value");
 			}
 		}
+		value += 0.025;
+		Log.out(value);
 		return value;
 	}
 	

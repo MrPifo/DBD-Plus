@@ -5,11 +5,13 @@
 <?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.CustomMenuItem?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -25,13 +27,29 @@
 
 <VBox alignment="CENTER" minHeight="600.0" minWidth="1000.0" prefWidth="900.0" styleClass="backgroundPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sperlich.Runtime">
   <children>
-    <MenuBar VBox.vgrow="NEVER">
+    <MenuBar VBox.vgrow="NEVER" fx:id="menuBar">
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
             <MenuItem mnemonicParsing="false" onAction="#exitApplication" text="Quit" />
           </items>
         </Menu>
+            <Menu mnemonicParsing="false" text="Toggle" fx:id="toggleMenu">
+              <items>
+                  <CheckMenuItem fx:id="screenOverlay" mnemonicParsing="false" onAction="#toggleScreenOverlay" text="Overlay" />
+                  <CheckMenuItem fx:id="toggleTime" mnemonicParsing="false" onAction="#toggleTime" text="Time" />
+                  <CheckMenuItem fx:id="toggleTotems" mnemonicParsing="false" onAction="#toggleTotems" text="Totem" />
+                  <CheckMenuItem fx:id="togglePallets" mnemonicParsing="false" onAction="#togglePallets" text="Pallet" />
+                  <CheckMenuItem fx:id="toggleVaults" mnemonicParsing="false" onAction="#toggleVaults" text="Vault" />
+                  <CheckMenuItem fx:id="toggleBloodpoints" mnemonicParsing="false" onAction="#toggleBloodpoints" text="Bloodpoints" />
+                  <CheckMenuItem fx:id="toggleMap" mnemonicParsing="false" onAction="#toggleMap" text="Map" />
+                  <CustomMenuItem mnemonicParsing="false" text="Overlay Opacity">
+                     <content>
+                        <Slider fx:id="opacitySlider" onMouseDragged="#updateOverlayOpacity" />
+                     </content>
+                  </CustomMenuItem>
+              </items>
+            </Menu>
         <Menu mnemonicParsing="false" text="Customize">
           <items>
             <SeparatorMenuItem mnemonicParsing="false" />
@@ -39,7 +57,7 @@
             <MenuItem fx:id="lightTheme" mnemonicParsing="false" onAction="#setLightTheme" text="Light Theme" />
           </items>
         </Menu>
-            <Menu mnemonicParsing="false" text="Skillchecker">
+            <Menu fx:id="skillChecker" mnemonicParsing="false" text="Skillchecker">
               <items>
                   <CheckMenuItem fx:id="performSkillChecks" mnemonicParsing="false" onAction="#togglePerformSkillChecks" text="Autohit Skillchecks (Experimental)" />
                   <MenuItem fx:id="performSkillLetter" mnemonicParsing="false" onAction="#showSkillCheckKey" text="Set key to press" />
@@ -48,6 +66,11 @@
             <Menu mnemonicParsing="false" text="Feedback">
               <items>
                 <MenuItem id="feedbackMenu" mnemonicParsing="false" onAction="#openFeedbackWindow" text="Send Comment" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Support Me">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#openDonationLink" text="Donate" />
               </items>
             </Menu>
         <Menu mnemonicParsing="false" text="Help">
@@ -405,6 +428,11 @@
                                           <Insets />
                                        </VBox.margin>
                                     </Text>
+                                    <Text fx:id="obsessionStateText0" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Dstrike Chance: 0">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Text>
                                     <StackPane prefHeight="150.0" prefWidth="200.0">
                                        <children>
                                           <Text fx:id="survAction0" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Action: repair" wrappingWidth="150.0">
@@ -424,7 +452,12 @@
                                     </StackPane>
                                     <ProgressBar fx:id="survBar0" prefWidth="200.0" progress="1.0" style="-fx-accent: #F60;">
                                        <VBox.margin>
-                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                          <Insets left="15.0" right="15.0" />
+                                       </VBox.margin>
+                                    </ProgressBar>
+                                    <ProgressBar fx:id="dstrikeBar0" layoutX="25.0" layoutY="115.0" prefWidth="200.0" progress="1.0" style="-fx-accent: #38F;">
+                                       <VBox.margin>
+                                          <Insets left="15.0" right="15.0" />
                                        </VBox.margin>
                                     </ProgressBar>
                                  </children>
@@ -453,6 +486,11 @@
                                           <Font size="16.0" />
                                        </font>
                                     </Text>
+                                    <Text fx:id="obsessionStateText1" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Dstrike Chance: 0">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Text>
                                     <StackPane prefHeight="150.0" prefWidth="200.0">
                                        <children>
                                           <Text fx:id="survAction1" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Action:" wrappingWidth="150.0">
@@ -472,8 +510,13 @@
                                     </StackPane>
                                     <ProgressBar fx:id="survBar1" prefWidth="200.0" progress="1.0" style="-fx-accent: #F60;">
                                        <VBox.margin>
-                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                          <Insets left="15.0" right="15.0" />
                                        </VBox.margin>
+                                    </ProgressBar>
+                                    <ProgressBar fx:id="dstrikeBar1" prefWidth="200.0" progress="1.0" style="-fx-accent: #38F;">
+                                       <padding>
+                                          <Insets left="15.0" right="15.0" />
+                                       </padding>
                                     </ProgressBar>
                                  </children>
                               </VBox>
@@ -501,6 +544,11 @@
                                           <Font size="16.0" />
                                        </font>
                                     </Text>
+                                    <Text fx:id="obsessionStateText2" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Dstrike Chance: 0">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Text>
                                     <StackPane prefHeight="150.0" prefWidth="200.0">
                                        <children>
                                           <Text fx:id="survAction2" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Action:" wrappingWidth="150.0">
@@ -520,8 +568,13 @@
                                     </StackPane>
                                     <ProgressBar fx:id="survBar2" prefWidth="200.0" progress="1.0" style="-fx-accent: #F60;">
                                        <VBox.margin>
-                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                          <Insets left="15.0" right="15.0" />
                                        </VBox.margin>
+                                    </ProgressBar>
+                                    <ProgressBar fx:id="dstrikeBar2" prefWidth="200.0" progress="1.0" style="-fx-accent: #38F;">
+                                       <padding>
+                                          <Insets left="15.0" right="15.0" />
+                                       </padding>
                                     </ProgressBar>
                                  </children>
                               </VBox>
@@ -549,6 +602,11 @@
                                           <Font size="16.0" />
                                        </font>
                                     </Text>
+                                    <Text fx:id="obsessionStateText3" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Dstrike Chance: 0">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Text>
                                     <StackPane prefHeight="150.0" prefWidth="200.0">
                                        <children>
                                           <Text fx:id="survAction3" fill="#7c7c7c" strokeType="OUTSIDE" strokeWidth="0.0" text="Action:" wrappingWidth="150.0">
@@ -568,8 +626,13 @@
                                     </StackPane>
                                     <ProgressBar fx:id="survBar3" prefWidth="200.0" progress="1.0" style="-fx-accent: #F60;">
                                        <VBox.margin>
-                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                          <Insets left="15.0" right="15.0" />
                                        </VBox.margin>
+                                    </ProgressBar>
+                                    <ProgressBar fx:id="dstrikeBar3" prefWidth="200.0" progress="1.0" style="-fx-accent: #38F;">
+                                       <padding>
+                                          <Insets left="15.0" right="15.0" />
+                                       </padding>
                                     </ProgressBar>
                                  </children>
                               </VBox>
