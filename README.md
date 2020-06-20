@@ -81,6 +81,12 @@ A list of features this program can achieve:
 
 ## Updates
 
+### 1.7 (v.4.0.0)
+
+- As you may have noticed, patch 4.0.0 fixed the DeadByDaylight.log file and they removed a lot of information you can extract from those files. I'm working to fix as much as possible, but features like perks are impossible to fix since they're not logged at all anymore.
+- Removed unneccesary features that broke within 4.0.0
+- Fixed killer detection (Still to be improved)
+
 ### 1.6
 
 - Added Donation button so you can support my work.
