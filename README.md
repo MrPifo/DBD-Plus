@@ -3,6 +3,8 @@
 DBD-Plus is an assistance software for Dead By Daylight to give you informations, which are normally not displayed ingame.
 Download: [DBD Plus.jar](https://www.sperlich.at/dbdplusdownload.php?download=true)
 
+My Twitter: https://twitter.com/DbdPlus
+
 ## Getting Started
 
 Download [DBD Plus.jar](https://www.sperlich.at/dbdplusdownload.php?download=true) and simply execute to run it. After that it should display something like this:
@@ -80,6 +82,12 @@ A list of features this program can achieve:
 - Legions ultra rare addon (Iridescent Button) confuses "Destroyed Pallets" counter.
 
 ## Updates
+
+### 1.7 (v.4.0.0)
+
+- As you may have noticed, patch 4.0.0 fixed the DeadByDaylight.log file and they removed a lot of information you can extract from those files. I'm working to fix as much as possible, but features like perks are impossible to fix since they're not logged at all anymore.
+- Removed unneccesary features that broke within 4.0.0
+- Fixed killer detection (Still to be improved)
 
 ### 1.6
 
