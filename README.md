@@ -83,6 +83,12 @@ A list of features this program can achieve:
 
 ## Updates
 
+### 1.8.1
+
+- Implemented option to rescale the UI-Overlay window.
+- Window position remains after restart.
+- Added patchnotes Popup after disclaimer.
+
 ### 1.7 (v.4.0.0)
 
 - As you may have noticed, patch 4.0.0 fixed the DeadByDaylight.log file and they removed a lot of information you can extract from those files. I'm working to fix as much as possible, but features like perks are impossible to fix since they're not logged at all anymore.
