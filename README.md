@@ -22,7 +22,7 @@ Download [DBD Plus.jar](https://www.sperlich.at/dbdplusdownload.php?download=tru
 
 ### Features
 
-Currently my software is strongly survivor sided. I'm working toward to improve the program for Killer gameplay.
+A lot of the shown features have been removed due to the patch v4.0.0!
 
 A list of features this program can achieve:
 
