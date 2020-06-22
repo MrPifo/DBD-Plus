@@ -9,7 +9,7 @@ My Twitter: https://twitter.com/DbdPlus
 
 Download [DBD Plus.jar](https://www.sperlich.at/dbdplusdownload.php?download=true) and simply execute to run it. After that it should display something like this:
 
-![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview2.png)
+![Image description](https://www.sperlich.at/assets/pictures/dbdplus_preview3.png)
 
 ### Notes
 
