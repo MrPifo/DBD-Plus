@@ -22,66 +22,24 @@ Download [DBD Plus.jar](https://www.sperlich.at/dbdplusdownload.php?download=tru
 
 ### Features
 
-Currently my software is strongly survivor sided. I'm working toward to improve the program for Killer gameplay.
+A lot of the shown features have been removed due to the patch v4.0.0!
 
 A list of features this program can achieve:
 
 - Showing the **killer in pre-lobby**.
-- Can **detect a great amount of killer perks** when ingame.
 - Dangerous **Killer-Offerings**(Ebony, Ivory, Cypress Mori)
-- See how many **totems** have been cleansed.
 - Current **Map** that is played.
-- How many vaults have spawned on the current map.
-- How many pallets have spawned on the current map.
-- See amount of destroyed pallets by killer.
-- See Killer/Survivor player nametags.
-- See current hookstage of individual survivors.
-- See current action of every survivor. Example(Action: repairing; Action: healing; etc...)
-- See a progression slider for Borrowed-Time before it deactivates.
+- Ingame program overlay.
 - Support for Light/Dark-Theme.
 - Automatic App-Version update.
 
-## Perks which cannot be detected:
-
-- Agitation 
-- Bloodhound
-- Bloodecho
-- DeerStalker
-- Discordance
-- Lightborn
-- Cruel Limits
-- Distressing 
-- Frankling's Demise
-- Furtive Chase
-- Gearhead
-- Infectious Fright
-- Insidious
-- Iron Grasp
-- Madgrit
-- Monitor Abuse
-- Monstrous Shrine
-- Pop Goes The Weasel
-- Nemesis
-- Play With Your Food
-- Predator
-- Overcharge
-- Save The Best For Last
-- Shadowborn
-- Spies From The Shadows
-- Spirit Fury
-- Surge
-- Surveillance
-- Unrelenting
-- Whispers
-- Zanshin Tactics
-
-## Known Issues
-
-- Spirit Fury confuses "Destroyed Pallets" counter
-- Spirit Fury deactivated at the moment
-- Legions ultra rare addon (Iridescent Button) confuses "Destroyed Pallets" counter.
-
 ## Updates
+
+### 1.8.1
+
+- Implemented option to rescale the UI-Overlay window.
+- Window position remains after restart.
+- Added patchnotes Popup after disclaimer.
 
 ### 1.7 (v.4.0.0)
 
