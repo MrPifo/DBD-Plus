@@ -29,6 +29,7 @@ A list of features this program can achieve:
 - Showing the **killer in pre-lobby**.
 - Dangerous **Killer-Offerings**(Ebony, Ivory, Cypress Mori)
 - Current **Map** that is played.
+- Ingame program overlay.
 - Support for Light/Dark-Theme.
 - Automatic App-Version update.
 
