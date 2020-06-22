@@ -1,12 +1,10 @@
 package sperlich;
 
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
@@ -46,6 +44,7 @@ public class Overlay {
 	public int fontSize = 35;
 	public int width;
 	public int height;
+	public boolean isEditing;
 	
 	public Overlay() {
 		try {
@@ -60,26 +59,46 @@ public class Overlay {
 	}
 	
 	public void init() {
-		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		width = gd.getDisplayMode().getWidth()-25;
-		height = gd.getDisplayMode().getHeight()-25;
-		
-		Log.out("Screen Resolution: " + width + "x" + height);
+		width = Runtime.config.overlayWidth;
+		height = Runtime.config.overlayHeight;
+		Log.out("Overlay Size: " + width + "x" + height);
 		
 		stage = new Stage();
-		stage.initStyle(StageStyle.TRANSPARENT);
+		root = new BorderPane();
+		scene = new Scene(root, width, height);
+		stage.setX(Runtime.config.overlayPosX);
+		stage.setY(Runtime.config.overlayPosY);
+		
+		if (!isEditing) {
+			stage.initStyle(StageStyle.TRANSPARENT);
+			stage.setResizable(false);
+			Log.out("CURRENT OVERLAY OPACITY: " + Runtime.config.overlayOpacity);
+			stage.setOpacity(Runtime.config.overlayOpacity);
+			root.setBackground(null);
+			scene.setFill(null);
+			stage.setMaxHeight(height);
+			stage.setMaxWidth(width);
+		} else {
+			stage.initStyle(StageStyle.DECORATED);
+			stage.setResizable(true);
+			stage.setOpacity(0.7);
+			stage.setOnCloseRequest(event -> exitOverlayEditMode());
+			scene.setFill(null);
+			root.setStyle("-fx-background-color: #111111");
+			Alert al = new Alert(Alert.AlertType.INFORMATION, "For rescaling and repositioning the overlay just drag and scale the window to your desired location and size. \n"
+					+ "After you are finished, just close the window and it will automaticially apply the changes.");
+			al.setTitle("How to use");
+			al.setResizable(true);
+			Stage aStage = (Stage) al.getDialogPane().getScene().getWindow();
+			aStage.getIcons().add(Runtime.getImage("dbd_icon.png"));
+			al.getDialogPane().setMinSize(500, 200);
+			al.showAndWait();
+		}
 		stage.setAlwaysOnTop(true);
 		stage.getIcons().add(Runtime.getImage("dbd_icon.png"));
 		stage.setTitle("overlay");
-		stage.setResizable(false);
-		stage.setMaxHeight(height);
-		stage.setMaxWidth(width);
 		grid = grid(3, 3);
 		//grid.setGridLinesVisible(true);
-		root = new BorderPane();
-		root.setBackground(null);
-		Log.out("CURRENT OVERLAY OPACITY: " + Runtime.config.overlayOpacity);
-		stage.setOpacity(Runtime.config.overlayOpacity);
         
 		// Buttons
 		close = new Button("X");
@@ -103,7 +122,7 @@ public class Overlay {
 		// Killer Perks
 		killerPerksGrid = grid(1, 4);
 		killerPerksGrid.setPrefSize(150, 100);
-		int perkSize = 100;
+		/*int perkSize = 100;
 		for (int i=0; i < 4; i++) {
 			ImageView perkB = new ImageView(Runtime.getImage("perk_frame.png"));
 			ImageView perkIcon = new ImageView(Runtime.getImage("perk_default.png"));
@@ -117,9 +136,9 @@ public class Overlay {
 			killerPerksGrid.add(perkIcon, i, 0);
 			killerPerksB[i] = perkB;
 			killerPerksIcon[i] = perkIcon;
-		}
+		}*/
 		// Survivor
-		int iconSize = 50;
+		/*int iconSize = 50;
 		for (int i=0; i < 4; i++) {
 			StackPane pStack = new StackPane();
 			VBox vb = new VBox();
@@ -167,25 +186,25 @@ public class Overlay {
 					name.setFill(Color.rgb(68, 68, 221));
 					break;
 			}
-		}
+		}*/
 		// HBoxes
 		totemHB = new HBox();
 		totemHB.setAlignment(Pos.CENTER_RIGHT);
-		totemHB.getChildren().addAll(totemText, totemPic);
+		//totemHB.getChildren().addAll(totemText, totemPic);
 		palletHB = new HBox();
 		palletHB.setAlignment(Pos.CENTER_RIGHT);
-		palletHB.getChildren().addAll(palletText, palletPic);
+		//palletHB.getChildren().addAll(palletText, palletPic);
 		vaultHB = new HBox();
 		vaultHB.setAlignment(Pos.CENTER_RIGHT);
-		vaultHB.getChildren().addAll(vaultText, vaultPic);
-		killerPerksHB = new HBox();
+		//vaultHB.getChildren().addAll(vaultText, vaultPic);
+		/*killerPerksHB = new HBox();
 		killerPerksHB.setAlignment(Pos.CENTER_LEFT);
 		killerPerksHB.getChildren().addAll(killerPlayerName);
 		survivorsHB = new HBox();
 		survivorsHB.setAlignment(Pos.BOTTOM_LEFT);
 		survivorsHB.setSpacing(50);
 		survivorsHB.setPadding(new Insets(50, 50, 50, 50));
-		survivorsHB.getChildren().addAll(survivors);
+		survivorsHB.getChildren().addAll(survivors);*/
 		 // VBoxes
 		centerVB = new VBox();
 		rightVB = new VBox();
@@ -201,16 +220,19 @@ public class Overlay {
 		centerVB.setPadding(new Insets(50, 50, 50, 50));
 		leftVB.setPadding(new Insets(50, 50, 50, 50));
 		leftVB.getChildren().addAll(mapName, offering);
+		leftVB.setAlignment(Pos.TOP_LEFT);
 		rightCenterVB.setSpacing(50);
 		rightCenterVB.setAlignment(Pos.CENTER_RIGHT);
-		rightCenterVB.getChildren().addAll(totemHB, palletHB, vaultHB);
+		//rightCenterVB.getChildren().addAll(totemHB, palletHB, vaultHB);
 		killerPerkVB.setPadding(new Insets(50, 50, 50, 50));
 		killerPerkVB.setAlignment(Pos.CENTER_LEFT);
-		killerPerkVB.getChildren().addAll(killerPerksHB, killerPerksGrid);
+		//killerPerkVB.getChildren().addAll(killerPerksHB, killerPerksGrid);
 		leftBotVB.setPadding(new Insets(15, 15, 15, 15));
 		leftBotVB.setAlignment(Pos.TOP_LEFT);
 		leftBotVB.getChildren().addAll(killerPerkVB);
 		centerVB.getChildren().addAll(killerName, time);
+		VBox.setMargin(killerName, new Insets(200, 0, 0, 0));
+		VBox.setMargin(time, new Insets(0, 0, 100, 0));
 		// Grid
 		grid.setMaxSize(width, height);
 		grid.setMinSize(5, 5);
@@ -219,17 +241,41 @@ public class Overlay {
 		grid.add(rightCenterVB, 2, 1);
 		grid.add(leftBotVB, 0, 2);
 		grid.add(leftVB, 0, 0);
-		grid.add(survivorsHB, 1, 2);
+		//grid.add(survivorsHB, 1, 2);
 		root.setCenter(grid);
 		root.setMaxSize(width, height);
 		root.setPrefSize(width, height);
-		
-		scene = new Scene(root, width, height);
-		stage.setMaxHeight(height);
-		stage.setMaxWidth(width);
-		scene.setFill(null);
+
 		stage.setScene(scene);
+		Log.out("FINISHED OVERLAY SETUP");
+		if (isEditing) {
+			killerName.setText("KILLERNAME");
+			time.setText("0m 0s");
+			mapName.setText("Here is your mapname");
+			offering.setImage(Runtime.getImage("ebony_mori.png"));
+			killerPlayerName.setText("Ingame killername");
+			root.setOnMouseMoved(e -> rescale());
+		}
 		stage.show();
+		rescale();
+	}
+	
+	public void rescale() {
+		Log.out("Rescaling");
+		width = (int) stage.getWidth();
+		height = (int) stage.getHeight();
+		offering.setFitWidth(width / 7);
+		offering.setFitHeight(width / 7);
+		if (offering.getFitWidth() > 150 || offering.getFitHeight() > 150) {
+			offering.setFitWidth(150);
+			offering.setFitHeight(150);
+		}
+		int font = width * height / 12000;
+		if (font > 35) font = 35;
+		killerName.setFont(new Font(font));
+		killerPlayerName.setFont(new Font(font));
+		mapName.setFont(new Font(font));
+		time.setFont(new Font(font));
 	}
 	
 	public Text text(String text, int size) {
@@ -256,16 +302,37 @@ public class Overlay {
         return g;
 	}
 	
+	public void enterOverlayEditMode() {
+		stage.close();
+		isEditing = true;
+		init();
+	}
+	
+	public void exitOverlayEditMode() {
+		// Applying changes
+		Runtime.config.overlayWidth = (int) stage.getWidth();
+		Runtime.config.overlayHeight = (int) stage.getHeight();
+		Runtime.config.overlayPosX = (int) stage.getX();
+		Runtime.config.overlayPosY = (int) stage.getY();
+		Runtime.config.save();
+		
+		stage.close();
+		isEditing = false;
+		init();
+		update();
+	}
+	
 	public void update() {
 		Platform.runLater(()-> {
 			killerName.setText(Runtime.killerName.getText());
 			time.setText(Runtime.matchStatusTime.getText());
 			mapName.setText(Runtime.mapName.getText());
 			offering.setImage(Runtime.killerOffering.getImage());
-			totemText.setText(Runtime.totalTotems.getText());
+			killerPlayerName.setText(Runtime.killerPlayerName.getText());
+			/*totemText.setText(Runtime.totalTotems.getText());
 			palletText.setText(Runtime.destroyedPallets.getText());
 			vaultText.setText(Runtime.totalVaults.getText());
-			killerPlayerName.setText(Runtime.killerPlayerName.getText());
+			
 			for (int i=0; i < 4; i++) {
 				ImageView perkB = killerPerksB[i];
 				ImageView perkIcon = killerPerksIcon[i];
@@ -287,7 +354,8 @@ public class Overlay {
 				deathIcons[i].setImage(Runtime.deadSymbols[i].getImage());
 				hookTexts[i].setText(Runtime.totalHooks[i].getText());
 				hookTexts[i].setVisible(Runtime.totalHooks[i].isVisible());
-			}
+			}*/
+			rescale();
 		});
 	}
 }

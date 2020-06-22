@@ -217,19 +217,19 @@ public class GameReader extends Thread {
 		if (playerIsIngame) {
 			try {
 				searchMap(line);
-				searchSurvivorStates(line, lineCount);
-				searchTotems(line);
-				searchKillerPerks(line, lineCount);
-				searchSurvivorPerks(line);
+				//searchSurvivorStates(line, lineCount);
+				//searchTotems(line);
+				//searchKillerPerks(line, lineCount);
+				//searchSurvivorPerks(line);
 				searchOfferings(line);
-				searchPallets(line);
-				searchPlayers(line, lineCount);
-				checkSurvivorHookPhases(line, lineCount);
-				searchSurvivorActions(line);
-				searchPlayerPositions(line);
-				searchOthers(line);
+				//searchPallets(line);
+				//searchPlayers(line, lineCount);
+				//checkSurvivorHookPhases(line, lineCount);
+				//searchSurvivorActions(line);
+				//searchPlayerPositions(line);
+				//searchOthers(line);
 				searchBloodPoints(line);
-				searchSkillCheck(line, lineCount, reader);
+				//searchSkillCheck(line, lineCount, reader);
 			} catch (Exception e) {
 				Log.out("An unexpected error occurred on this line! Printing error...");
 				StackTraceElement[] elements = e.getStackTrace();
@@ -265,9 +265,9 @@ public class GameReader extends Thread {
 			}
 		}
 		if (lastSteamId != null && Search.contains(line, "LogCustomization: -->")) {
-			String killer = getKillerByCosmetic(line.substring(Search.getIndex(line, ">")+1, Search.getIndex(line, "_")+1).trim().toLowerCase());
-			if (!killer.equals("error")) {
-				Log.out("Killer " + killer + " Steam64-Id found: " + lastSteamId);
+			int id = getKillerByCosmetic(line.substring(Search.getIndex(line, ">")+1, Search.getIndex(line, "_")+1).trim().toLowerCase());
+			if (id > 0) {
+				Log.out("Killer " + getKillerById(id) + " Steam64-Id found: " + lastSteamId);
 				killerSteamId = lastSteamId.substring(Search.getIndex(lastSteamId, "|")+1, lastSteamId.length());
 				Runtime.killerSteamURL = "https://steamcommunity.com/profiles/" + killerSteamId;
 				Tooltip t = new Tooltip("Opem Steam-Profile: " + Runtime.killerSteamURL);
@@ -277,99 +277,103 @@ public class GameReader extends Thread {
 		}
 	}
 	
-	public String getKillerByCosmetic(String line) {
+	public int getKillerByCosmetic(String line) {
 		// Trapper
-		if (Search.contains(line, "S01_") || Search.contains(line, "TR_")) {
-			return "Trapper";
+		if (Search.contains(line, "TR_")) {
+			return 1;
 		}
 		// Wraith
 		if (Search.contains(line, "Wraith_") || Search.contains(line, "TW")) {
-			return "Wraith";
+			return 2;
 		}
 		// Hillbilly
 		if (Search.contains(line, "Hillbilly_") || Search.contains(line, "TC")) {
-			return "Hillbilly";
+			return 3;
 		}
 		// Nurse
 		if (Search.contains(line, "Nurse_") || Search.contains(line, "TN_")) {
-			return "Nurse";
-		}
-		// Huntress
-		if (Search.contains(line, "BE_")) {
-			return "Huntress";
-		}
-		// Michael Myers
-		if (Search.contains(line, "MM_")) {
-			return "Shape";
+			return 4;
 		}
 		// Hag
 		if (Search.contains(line, "HA_")) {
-			return "Hag";
+			return 5;
+		}
+		// Michael Myers
+		if (Search.contains(line, "MM_")) {
+			return 6;
 		}
 		// Doctor
 		if (Search.contains(line, "DO_")) {
-			return "Doctor";
+			return 7;
+		}
+		// Huntress
+		if (Search.contains(line, "BE_")) {
+			return 8;
 		}
 		// Leatherface
 		if (Search.contains(line, "CA_")) {
-			return "Leatherface";
+			return 9;
 		}
 		// Freddy
 		if (Search.contains(line, "SD_")) {
-			return "Freddy";
+			return 10;
 		}
 		// Pig
 		if (Search.contains(line, "FK_")) {
-			return "Pig";
+			return 11;
 		}
 		// Clown
 		if (Search.contains(line, "GK_")) {
-			return "Clown";
+			return 12;
 		}
 		// Spirit
 		if (Search.contains(line, "HK_")) {
-			return "Spirit";
+			return 13;
 		}
 		// Legion
 		if (Search.contains(line, "KK_")) {
-			return "Legion";
+			return 14;
 		}
 		// Plague
 		if (Search.contains(line, "MK_")) {
-			return "Plague";
+			return 15;
 		}
 		// Ghostface
 		if (Search.contains(line, "OK_")) {
-			return "Ghostface";
+			return 16;
 		}
 		// Demogorgon
 		if (Search.contains(line, "QK_")) {
-			return "Demogorgon";
+			return 17;
 		}
 		// Oni
 		if (Search.contains(line, "Swedenkiller_") || Search.contains(line, "SW_")) {
-			return "Oni";
+			return 18;
 		}
 		// Deathslinger
 		if (Search.contains(line, "UK_") || Search.contains(line, "UkraineKiller_")) {
-			return "Deathslinger";
+			return 19;
 		}
-		return "error";
+		// Executioner
+		if (Search.contains(line, "K20_")) {
+			return 20;
+		}
+		return -1;
 	}
 	
 	public void setKiller(int id) {
-		if (oldKillerId != currentKillerId) {
-			Log.out("Killer detected: " + GetKillerById(id));
+		if (oldKillerId != currentKillerId && currentKillerId > 0) {
+			Log.out("Killer detected: " + getKillerById(id) + " id: " + currentKillerId);
 			Runtime.setKillerPic(id);
-			Runtime.setText(Runtime.killerName, GetKillerById(id));
+			Runtime.setText(Runtime.killerName, getKillerById(id));
 			if (Runtime.overlay != null) {
-				Runtime.setText(Runtime.overlay.killerName, GetKillerById(id));
+				Runtime.setText(Runtime.overlay.killerName, getKillerById(id));
 			}
 			oldKillerId = currentKillerId;
 		}
 	}
 
-	public String GetKillerById(int id) {
+	public String getKillerById(int id) {
 		switch (id) {
 		case 1:
 			return "Trapper";
@@ -409,6 +413,8 @@ public class GameReader extends Thread {
 			return "Oni";
 		case 19:
 			return "Deathslinger";
+		case 20:
+			return "Executioner";
 		default:
 			return "Unknown";
 		}
@@ -427,11 +433,11 @@ public class GameReader extends Thread {
 	public void startGame(int lineCount) {
 		Log.out("Match start detected.");
 		resetGame();
-		Runtime.totemsBox.setVisible(true);
-		Runtime.palletsBox.setVisible(true);
-		Runtime.vaultsBox.setVisible(true);
-		Runtime.survivorsTitle.setVisible(true);
-		Runtime.mapBox.setVisible(true);
+		//Runtime.totemsBox.setVisible(true);
+		//Runtime.palletsBox.setVisible(true);
+		//Runtime.vaultsBox.setVisible(true);
+		//Runtime.survivorsTitle.setVisible(true);
+		//Runtime.mapBox.setVisible(true);
 		playerIsIngame = true;
 		startLineNumber = lineCount;
 		Runtime.setText(Runtime.matchStatusTime, "Loading");
@@ -468,42 +474,43 @@ public class GameReader extends Thread {
 		currentMatchDuration = 0;
 		hatchSpawned = false;
 		matchHasStarted = false;
+		lastSteamId = null;
 		Runtime.toggleNode(Runtime.hatchTitle, false);
 		Runtime.toggleImage(Runtime.hatchImage, false);
-		Runtime.setText(Runtime.killerPlayerName, "Detected Perks: ");
+		//Runtime.setText(Runtime.killerPlayerName, "Detected Perks: ");
 		obsessionStates = new ArrayList<>();
 		killerPerks = new String[4];
 		for (int i = 0; i < Runtime.survivorNames.length; i++) {
-			Runtime.setText(Runtime.survivorNames[i], "");
-			Runtime.setText(Runtime.totalHooks[i], "Hookstate: 0");
+			//Runtime.setText(Runtime.survivorNames[i], "");
+			//Runtime.setText(Runtime.totalHooks[i], "Hookstate: 0");
 			Runtime.toggleNode(Runtime.survivorAction[i], false);
 			Runtime.toggleNode(Runtime.totalHooks[i], false);
 			Runtime.toggleNode(Runtime.survivorBars[i], false);
-			Runtime.setProgress(Runtime.survivorBars[i], 0);
-			Runtime.deadSymbols[i].setVisible(false);
-			Runtime.setText(Runtime.survivorAction[i], "");
-			Runtime.setImage(Runtime.actionIcons[i], null);
+			//Runtime.setProgress(Runtime.survivorBars[i], 0);
+			//Runtime.deadSymbols[i].setVisible(false);
+			//Runtime.setText(Runtime.survivorAction[i], "");
+			//Runtime.setImage(Runtime.actionIcons[i], null);
 		}
 		players = new ArrayList<>();
 		matchTime = 0;
 		normalDestroyedPallets = 0;
-		Runtime.setText(Runtime.matchStatusTime, "LOBBY");
-		Runtime.setText(Runtime.destroyedPallets, totalDestroyedPallets + "/0");
-		Runtime.setText(Runtime.totalTotems, "0/5");
-		Runtime.setText(Runtime.totalVaults, "0/0");
+		Runtime.setText(Runtime.matchStatusTime, "Lobby");
+		//Runtime.setText(Runtime.destroyedPallets, totalDestroyedPallets + "/0");
+		//Runtime.setText(Runtime.totalTotems, "0/5");
+		//Runtime.setText(Runtime.totalVaults, "0/0");
 		Runtime.setImage(Runtime.killerOffering, null);
 		Runtime.toggleImage(Runtime.killerOffering, false);
 		Runtime.toggleNode(Runtime.offeringTitle, false);
 		Runtime.toggleNode(Runtime.mapName, false);
 		Runtime.toggleNode(Runtime.mapTitle, false);
 		Runtime.toggleImage(Runtime.hatchImage, false);
-		searchTotems("");
+		//searchTotems("");
 		for (int i = 0; i < Runtime.killerPerks.length; i++) {
 			if (Runtime.killerPerks[i] != null && Runtime.killerPerkFrames[i] != null) {
-				String icon = "perk_default.png";
-				Runtime.setImage(Runtime.killerPerks[i], icon);
-				Runtime.toggleImage(Runtime.killerPerks[i], false);
-				Runtime.toggleImage(Runtime.killerPerkFrames[i], false);
+				//String icon = "perk_default.png";
+				//Runtime.setImage(Runtime.killerPerks[i], icon);
+				//Runtime.toggleImage(Runtime.killerPerks[i], false);
+				//Runtime.toggleImage(Runtime.killerPerkFrames[i], false);
 			}
 		}
 		Runtime.updateOverlay();
@@ -563,7 +570,7 @@ public class GameReader extends Thread {
 	
 	public void searchSurvivorActions(String line) {
 		applyObsessionState();
-		boolean updateStatus = false;
+		//boolean updateStatus = false;
 		// Survivor started any interaction
 		if (Search.contains(line, Search.interactEnter)) {
 			Player p = findPlayer(line);
@@ -571,7 +578,7 @@ public class GameReader extends Thread {
 				p.isInteracting = true;
 				lastPlayerInteracting = p;
 				if (p.isSurvivor) {
-					updateStatus = true;
+					//updateStatus = true;
 				}
 			}
 		}
@@ -583,7 +590,7 @@ public class GameReader extends Thread {
 				//Runtime.toggleImage(Runtime.actionIcons[p.survivorId], false);
 				//Runtime.setText(Runtime.survivorAction[p.survivorId], "");
 				if (p.isSurvivor) {
-					updateStatus = true;
+					//updateStatus = true;
 				}
 			}
 		}
@@ -770,8 +777,16 @@ public class GameReader extends Thread {
 				Runtime.setImage(Runtime.actionIcons[p.survivorId], "action_chase.gif");
 				Runtime.toggleImage(Runtime.actionIcons[p.survivorId], true);
 				Runtime.setText(Runtime.survivorAction[p.survivorId], "");
-				Runtime.toggleNode(Runtime.overlay.actionIcons[p.survivorId], true);
-				Runtime.setImage(Runtime.overlay.actionIcons[p.survivorId], "action_chase.png");
+				try {
+					//Runtime.toggleNode(Runtime.overlay.actionIcons[p.survivorId], true);
+					//Runtime.setImage(Runtime.overlay.actionIcons[p.survivorId], "action_chase.png");
+				} catch (Exception e) {
+					Log.out("Failed to set chase icon in overlay");
+					StackTraceElement[] elements = e.getStackTrace();
+		            for (int iterator=1; iterator<=elements.length; iterator++)  {
+		               Log.out("Class Name:"+elements[iterator-1].getClassName()+" Method Name:"+elements[iterator-1].getMethodName()+" Line Number:"+elements[iterator-1].getLineNumber());
+		        	}
+				}
 			}
 		}
 		
@@ -1060,12 +1075,18 @@ public class GameReader extends Thread {
 	}
 	
 	public void searchKiller(String line) {
-		if (Search.contains(line, Search.killer)) {
+		/*if (Search.contains(line, Search.killer)) {
 			// System.out.println(line);
 			int index = Search.getIndex(line, Search.killer);
 			line = line.substring(index, line.length());
 			line = line.replace(Search.killer, "");
 			currentKillerId = Integer.parseInt(line.substring(0, 2));
+		}*/
+		if (Search.contains(line, "LogCustomization: -->")) {
+			int id = getKillerByCosmetic(line);
+			if (id > 0) {
+				currentKillerId = id;
+			}
 		}
 	}
 
@@ -1252,9 +1273,9 @@ public class GameReader extends Thread {
 			if (Search.contains(line, Search.unnvervingPresence)) {
 				setPerk("unnervingPresence");
 			}
-			if (Search.contains(line, Search.enduringPalletStunSpeed) && Search.contains(lastInteractionEnterLine, Search.palletStun)) {
+			/*if (Search.contains(line, Search.enduringPalletStunSpeed) && Search.contains(lastInteractionEnterLine, Search.palletStun)) {
 				setPerk("enduring");
-			}
+			}*/
 			if (Search.contains(line, Search.gameStartCamAnimationEnd)) {
 				camFadeOutLine = lineCount;
 			}
@@ -1570,7 +1591,7 @@ public class GameReader extends Thread {
 			}
 		}
 		for (int i = 0; i < killerPerks.length; i++) {
-			if (killerPerks[i] == "" || killerPerks[i] == null) {
+			if (killerPerks[i].equals("") || killerPerks[i] == null) {
 				try {
 					killerPerks[i] = perk;
 					String image = "iconPerks_" + perk + ".png";

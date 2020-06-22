@@ -23,8 +23,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
@@ -62,7 +60,7 @@ import java.io.InputStreamReader;
 import java.io.File;
 
 public class Runtime extends Application {
-	public static String appVersion = "v1.6.2";
+	public static String appVersion = "v1.8.1";
 	public static String download = "https://www.sperlich.at/storage/content/DBD%20Plus.jar";
 	public static String downloadPath = System.getProperty("user.dir") + "/DBD Plus.jar";
 	public static String killerSteamURL;
@@ -161,13 +159,22 @@ public class Runtime extends Application {
 			Log.out("Failed to load FXMLLoader");
 		}
 		Runtime.scene = new Scene(root, 1000, 650);
-		stage.setTitle("DBD Plus");
+		stage.setTitle("DBD+");
 		stage.setMinHeight(600);
 		stage.setMinWidth(1000);
 		stage.getIcons().add(getImage("dbd_icon.png"));
 		stage.setScene(scene);
 		stage.setResizable(true);
-		stage.setOnCloseRequest(event -> exitApplication());
+		stage.setOnCloseRequest(event -> {
+			try {
+				Runtime.config.mainWindowPosX = (int) stage.getX();
+				Runtime.config.mainWindowPosY = (int) stage.getY();
+				Runtime.config.save();
+			} catch (Exception e) {
+				exitApplication();
+			}
+			exitApplication();
+		});
 		URL css = Runtime.class.getResource("style.css");
 		Runtime.lightTheme = getClass().getResource("light_theme.css").toExternalForm();
 		Runtime.darkTheme = getClass().getResource("dark_theme.css").toExternalForm();
@@ -186,7 +193,6 @@ public class Runtime extends Application {
 		killerPlayerName = (Text) root.lookup("#killerName");
 		matchStatusTime = (Text) root.lookup("#gameStatusTime");
 		killerPic = (ImageView) root.lookup("#killerPic");
-		totalTotems = (Text) root.lookup("#totalTotems");
 		mapName = (Text) root.lookup("#mapName");
 		mapTitle = (Text) root.lookup("#mapTitle");
 		offeringTitle = (Text) root.lookup("#offeringTitle");
@@ -218,7 +224,7 @@ public class Runtime extends Application {
 		startUpLoadBar.setProgress(0);
 		downloadProgress = (ProgressBar) root.lookup("#downloadBar");
 		downloadProgress.setVisible(false);
-		totalTotems.setText("0/0");
+		//totalTotems.setText("0/0");
 		matchStatusTime.setText("LOBBY");
 		killerOffering.setImage(null);
 		destroyedPallets.setText("0/0");
@@ -296,6 +302,13 @@ public class Runtime extends Application {
 		loadPerformSkillChecks();
 		checkForUpdate();
 		config.performSkillchecks = false;
+		scene.setOnMouseClicked(e -> {
+			Runtime.config.mainWindowPosX = (int) stage.getX();
+			Runtime.config.mainWindowPosY = (int) stage.getY();
+			Runtime.config.save();
+		});
+		stage.setX(Runtime.config.mainWindowPosX);
+		stage.setY(Runtime.config.mainWindowPosY);
 		stage.show();
 		if (!config.policy) {
 			openDisclaimerPopup();
@@ -326,19 +339,14 @@ public class Runtime extends Application {
 		}
 		CheckMenuItem overlayMenu = (CheckMenuItem) loader.getNamespace().get("screenOverlay");
 		overlayMenu.setSelected(config.overlay);
-		overlayMenu.setDisable(true);
-		MenuBar menuBar = (MenuBar) loader.getNamespace().get("menuBar");
-		Menu toggleMenu = (Menu) loader.getNamespace().get("toggleMenu");
-		menuBar.getMenus().remove(toggleMenu);
-		if (overlay != null) {
-			overlay.stage.close();
-		}
+		//MenuBar menuBar = (MenuBar) loader.getNamespace().get("menuBar");
+		//Menu toggleMenu = (Menu) loader.getNamespace().get("toggleMenu");
 		if (!switched) {
 			toggleTime();
-			toggleTotems();
-			togglePallets();
-			toggleVaults();
-			toggleBloodpoints();
+			//toggleTotems();
+			//togglePallets();
+			//toggleVaults();
+			//toggleBloodpoints();
 			toggleMap();
 			opacitySlider.setValue(Runtime.config.overlayOpacity*100);
 		}
@@ -392,6 +400,8 @@ public class Runtime extends Application {
 				Runtime.config.save();
 			}
 		}
+		Runtime.config.totems = false;
+		Runtime.config.save();
 		if (Runtime.config.totems) {
 			Log.out("DISPLAY TOTEMS: ON");
 			toggleNode(Runtime.totemsBox, true);
@@ -419,6 +429,8 @@ public class Runtime extends Application {
 				Runtime.config.save();
 			}
 		}
+		Runtime.config.pallets = false;
+		Runtime.config.save();
 		if (Runtime.config.pallets) {
 			Log.out("DISPLAY PALLETS: ON");
 			toggleNode(Runtime.palletsBox, true);
@@ -446,6 +458,8 @@ public class Runtime extends Application {
 				Runtime.config.save();
 			}
 		}
+		Runtime.config.vaults = false;
+		Runtime.config.save();
 		if (Runtime.config.vaults) {
 			Log.out("DISPLAY VAULTS: ON");
 			toggleNode(Runtime.vaultsBox, true);
@@ -516,6 +530,13 @@ public class Runtime extends Application {
 			overlay.stage.setOpacity(opacitySlider.getValue()/100);
 			Runtime.config.overlayOpacity = opacitySlider.getValue()/100;
 			Runtime.config.save();
+		}
+	}
+	
+	public void editOverlay() {
+		if (overlay != null) {
+			Log.out("Enter Overlay Edit Mode");
+			overlay.enterOverlayEditMode();
 		}
 	}
 	
@@ -745,11 +766,16 @@ public class Runtime extends Application {
 	}
 	
 	public void showPatchnotes() {
-		Alert al = new Alert(Alert.AlertType.INFORMATION, "Version 1.6.2 \n "
-				+ "\n Full Patchnotes on: https://github.com/MrPifo/DBD-Plus"
-				+ "\n - Updated disclaimer and policy for security reasons."
-				+ "\n - Bufixes");
+		Alert al = new Alert(Alert.AlertType.INFORMATION, "Version 1.8.1 \n "
+				+ "\n - Implemented Overlay UI-Rescale option."
+				+ "\n - Window screen position remains after restart."
+				+ "\n - Patchnotes show up automaticially after disclaimer.");
 		al.setTitle("Patchnotes");
+		al.setResizable(true);
+		Stage aStage = (Stage) al.getDialogPane().getScene().getWindow();
+		aStage.getIcons().add(Runtime.getImage("dbd_icon.png"));
+		al.getDialogPane().setMinSize(500, 200);
+		al.setHeaderText("What's new?");
 		al.showAndWait();
 	}
 	
@@ -1112,6 +1138,7 @@ public class Runtime extends Application {
 				config.load();
 				if (config.policy) {
 					disclaimerWindow.close();
+					showPatchnotes();
 				}
 			} else {
 				policyCheck.setTextFill(Color.rgb(255, 100, 100));

@@ -27,22 +27,23 @@
 
 <VBox alignment="CENTER" minHeight="600.0" minWidth="1000.0" prefWidth="900.0" styleClass="backgroundPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sperlich.Runtime">
   <children>
-    <MenuBar VBox.vgrow="NEVER" fx:id="menuBar">
+    <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
             <MenuItem mnemonicParsing="false" onAction="#exitApplication" text="Quit" />
           </items>
         </Menu>
-            <Menu mnemonicParsing="false" text="Toggle" fx:id="toggleMenu">
+            <Menu fx:id="toggleMenu" mnemonicParsing="false" text="Toggle">
               <items>
                   <CheckMenuItem fx:id="screenOverlay" mnemonicParsing="false" onAction="#toggleScreenOverlay" text="Overlay" />
                   <CheckMenuItem fx:id="toggleTime" mnemonicParsing="false" onAction="#toggleTime" text="Time" />
-                  <CheckMenuItem fx:id="toggleTotems" mnemonicParsing="false" onAction="#toggleTotems" text="Totem" />
-                  <CheckMenuItem fx:id="togglePallets" mnemonicParsing="false" onAction="#togglePallets" text="Pallet" />
-                  <CheckMenuItem fx:id="toggleVaults" mnemonicParsing="false" onAction="#toggleVaults" text="Vault" />
-                  <CheckMenuItem fx:id="toggleBloodpoints" mnemonicParsing="false" onAction="#toggleBloodpoints" text="Bloodpoints" />
+                  <!-- <CheckMenuItem fx:id="toggleTotems" mnemonicParsing="false" onAction="#toggleTotems" text="Totem" /> -->
+                  <!-- <CheckMenuItem fx:id="togglePallets" mnemonicParsing="false" onAction="#togglePallets" text="Pallet" /> -->
+                  <!-- <CheckMenuItem fx:id="toggleVaults" mnemonicParsing="false" onAction="#toggleVaults" text="Vault" /> -->
+                  <!-- <CheckMenuItem fx:id="toggleBloodpoints" mnemonicParsing="false" onAction="#toggleBloodpoints" text="Bloodpoints" /> -->
                   <CheckMenuItem fx:id="toggleMap" mnemonicParsing="false" onAction="#toggleMap" text="Map" />
+                  <MenuItem fx:id="resizeOverlay" mnemonicParsing="false" onAction="#editOverlay" text="Resize" />
                   <CustomMenuItem mnemonicParsing="false" text="Overlay Opacity">
                      <content>
                         <Slider fx:id="opacitySlider" onMouseDragged="#updateOverlayOpacity" />
@@ -125,7 +126,7 @@
                <children>
                   <VBox alignment="BOTTOM_LEFT" prefHeight="120.0" prefWidth="350.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="10.0">
                      <children>
-                        <Text fx:id="killerName" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Detected Perks:" wrappingWidth="350.0">
+                        <Text fx:id="killerName" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" wrappingWidth="350.0">
                            <font>
                               <Font name="Calibri" size="23.0" />
                            </font>
@@ -334,17 +335,17 @@
                               <Insets top="50.0" />
                            </GridPane.margin>
                         </HBox>
-                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Cleansed Totems:" textAlignment="RIGHT" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS">
+                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" textAlignment="RIGHT" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS">
                            <font>
                               <Font name="Calibri" size="28.0" />
                            </font>
                         </Text>
-                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Destroyed Pallets:" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                            <font>
                               <Font name="Calibri" size="28.0" />
                            </font>
                         </Text>
-                        <Text fx:id="totalWindowsTitle" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Total Vaults:" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+                        <Text fx:id="totalWindowsTitle" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" GridPane.halignment="LEFT" GridPane.rowIndex="4">
                            <font>
                               <Font name="Calibri" size="28.0" />
                            </font>

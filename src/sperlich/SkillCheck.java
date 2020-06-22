@@ -48,7 +48,7 @@ public class SkillCheck extends Thread {
 		timeDifference.add(GameReader.getTimestamp(line));
 		serverTime = GameReader.getDateFromTimestamp(GameReader.getTimestamp(line));
 		pcTime = new Date();
-		serverTime.setHours(pcTime.getHours());
+		//serverTime.setHours(pcTime.getHours());
 		serverDelay = Math.abs(pcTime.getTime() - serverTime.getTime());
 		Log.out("SERVER DELAY: " + serverDelay);
 	}
@@ -76,12 +76,10 @@ public class SkillCheck extends Thread {
 		totalTime = Math.abs(Math.round((timeDelay/value1)*(areaStart+areaLength/2)-serverDelay-lostTime));
 		Log.out("Time between values: " + timeDelay);
 		Log.out("Calculated Hit-Time: " + totalTime);
-		boolean blockSecondMethod = false;
 		if (totalTime <= Math.round(areaStart)*1000.0) {
 			Log.out("WARNING: Hit-Time calculation is lower than hitAreaStart! Setting to areaStart.");
 			totalTime = Math.round(areaStart*1000.0);
 			//Log.out("New calculated Hit-Time: " + totalTime);
-			blockSecondMethod = true;
 		}
 		totalTime = (int)Math.floor(areaStart*1000)-100;
 		Log.out("New calculated Hit-Time: " + totalTime);

@@ -10,7 +10,6 @@ import java.net.URLConnection;
 
 public class Updater extends Thread {
 	public void downloadNewVersion() {
-		URL link;
 		BufferedInputStream in;
 		Log.out("Start download...");
 		try {
@@ -27,8 +26,8 @@ public class Updater extends Thread {
 	        	fileOutputStream.write(dataBuffer, 0, bytesRead);
 	        	downloaded += 256;
 	        	Runtime.downloadProgress.setProgress(downloaded/1024/1024/fileSize);
-	        	//Log.out(Math.round(downloaded/1024/1024*1000.0)/1000.0);
 	        }
+	        fileOutputStream.close();
 	        File f = new File(Runtime.downloadPath); 
 	        if (f.exists()) {
 	        	Runtime.displayTray();

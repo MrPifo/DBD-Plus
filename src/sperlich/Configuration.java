@@ -1,5 +1,7 @@
 package sperlich;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +24,12 @@ public class Configuration implements Serializable {
 	public boolean map = true;
 	public double overlayOpacity = 0.5f;
 	public boolean allowNetwork;
+	public int overlayWidth;
+	public int overlayHeight;
+	public int overlayPosX;
+	public int overlayPosY;
+	public int mainWindowPosX;
+	public int mainWindowPosY;
 
 	public void save() {
 		try {
@@ -40,6 +48,7 @@ public class Configuration implements Serializable {
 			objectInput.close();
 		} catch (Exception e) {
 			Log.out("Failed to load save file! Creating new...");
+			GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 			Runtime.config = new Configuration();
 			Runtime.config.performSkillchecks = false;
 			Runtime.config.skillCheckLetter = ' ';
@@ -53,6 +62,12 @@ public class Configuration implements Serializable {
 			Runtime.config.map = true;
 			Runtime.config.overlayOpacity = 0.5f;
 			Runtime.config.allowNetwork = true;
+			Runtime.config.overlayPosX = 0;
+			Runtime.config.overlayPosY = 0;
+			Runtime.config.overlayWidth = gd.getDisplayMode().getWidth() - 25;
+			Runtime.config.overlayHeight = gd.getDisplayMode().getHeight() - 25;
+			Runtime.config.mainWindowPosX = 0;
+			Runtime.config.mainWindowPosY = 0;
 		}
 	}
 }
