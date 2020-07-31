@@ -84,6 +84,14 @@
     </MenuBar>
     <AnchorPane fx:id="body" maxHeight="-1.0" maxWidth="-1.0" prefWidth="595.0" VBox.vgrow="ALWAYS">
       <children>
+            <ImageView fitHeight="45.0" fitWidth="45.0" onMouseClicked="#openTwitter" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0">
+               <image>
+                  <Image url="@twitter.png" />
+               </image>
+               <cursor>
+                  <Cursor fx:constant="OPEN_HAND" />
+               </cursor>
+            </ImageView>
             <AnchorPane prefHeight="385.0" prefWidth="595.0" stylesheets="@style.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
                   <VBox alignment="CENTER" fillWidth="false" prefWidth="1325.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -124,7 +132,7 @@
             </AnchorPane>
             <AnchorPane layoutX="5.0" layoutY="508.0" nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0">
                <children>
-                  <VBox alignment="BOTTOM_LEFT" prefHeight="120.0" prefWidth="350.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="10.0">
+                  <VBox alignment="BOTTOM_LEFT" disable="true" prefHeight="120.0" prefWidth="350.0" visible="false" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="10.0">
                      <children>
                         <Text fx:id="killerName" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" wrappingWidth="350.0">
                            <font>
@@ -189,7 +197,7 @@
                         </GridPane>
                      </children>
                   </VBox>
-                  <HBox alignment="BOTTOM_LEFT" layoutX="14.0" layoutY="96.0" prefHeight="100.0" prefWidth="981.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                  <HBox alignment="BOTTOM_LEFT" layoutX="14.0" layoutY="96.0" prefHeight="100.0" prefWidth="433.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
                      <children>
                         <Text fx:id="appVersion" boundsType="VISUAL" fill="WHITE" onMouseClicked="#downloadNewVersion" onMouseEntered="#enterDownloadText" onMouseExited="#exitDownloadText" strokeType="OUTSIDE" strokeWidth="0.0" text="new version avialable: v1.0.0" wrappingWidth="600.0" HBox.hgrow="ALWAYS">
                            <font>
@@ -214,7 +222,7 @@
                   </HBox>
                </children>
             </AnchorPane>
-            <AnchorPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="300.0" prefWidth="225.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+            <AnchorPane disable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="300.0" prefWidth="225.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                <children>
                   <GridPane layoutX="-30.0" prefHeight="398.0" prefWidth="250.0" AnchorPane.bottomAnchor="-98.0" AnchorPane.leftAnchor="-30.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                     <columnConstraints>
@@ -231,7 +239,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <HBox fx:id="totemsBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+                        <HBox fx:id="totemsBox" alignment="CENTER_LEFT" disable="true" prefHeight="100.0" prefWidth="200.0" visible="false" GridPane.rowIndex="1">
                            <children>
                               <Text fx:id="totalTotems" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="0/0" textAlignment="RIGHT">
                                  <font>
@@ -257,7 +265,7 @@
                               <Insets top="15.0" />
                            </GridPane.margin>
                         </HBox>
-                        <HBox fx:id="palletsBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
+                        <HBox fx:id="palletsBox" alignment="CENTER_LEFT" disable="true" prefHeight="100.0" prefWidth="200.0" visible="false" GridPane.rowIndex="3">
                            <children>
                               <Text fx:id="destroyedPallets" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="0/0" textAlignment="RIGHT">
                                  <font>
@@ -283,7 +291,7 @@
                               <Insets top="15.0" />
                            </GridPane.margin>
                         </HBox>
-                        <HBox fx:id="vaultsBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="5">
+                        <HBox fx:id="vaultsBox" alignment="CENTER_LEFT" disable="true" prefHeight="100.0" prefWidth="200.0" visible="false" GridPane.rowIndex="5">
                            <children>
                               <Text fx:id="totalVaults" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="0/0" textAlignment="RIGHT">
                                  <font>
@@ -309,7 +317,7 @@
                               <Insets top="15.0" />
                            </GridPane.margin>
                         </HBox>
-                        <HBox fx:id="bloodpointsBox" alignment="CENTER_RIGHT" layoutX="10.0" layoutY="178.0" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="7">
+                        <HBox fx:id="bloodpointsBox" alignment="CENTER_RIGHT" layoutX="10.0" layoutY="178.0" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
                            <children>
                               <Text fx:id="totalBloodpoints" fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="0" textAlignment="RIGHT">
                                  <font>
@@ -335,22 +343,22 @@
                               <Insets top="50.0" />
                            </GridPane.margin>
                         </HBox>
-                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" textAlignment="RIGHT" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS">
+                        <Text disable="true" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" textAlignment="RIGHT" visible="false" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS">
                            <font>
                               <Font name="Calibri" size="28.0" />
                            </font>
                         </Text>
-                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+                        <Text disable="true" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" visible="false" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                            <font>
                               <Font name="Calibri" size="28.0" />
                            </font>
                         </Text>
-                        <Text fx:id="totalWindowsTitle" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+                        <Text fx:id="totalWindowsTitle" disable="true" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" visible="false" GridPane.halignment="LEFT" GridPane.rowIndex="4">
                            <font>
                               <Font name="Calibri" size="28.0" />
                            </font>
                         </Text>
-                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Earned Bloodpoints:" textAlignment="RIGHT" GridPane.halignment="RIGHT" GridPane.rowIndex="6" GridPane.valignment="CENTER">
+                        <Text fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Earned Bloodpoints:" textAlignment="RIGHT" GridPane.halignment="RIGHT" GridPane.valignment="CENTER">
                            <font>
                               <Font name="Calibri" size="22.0" />
                            </font>
@@ -400,7 +408,7 @@
                   </Text>
                </children>
             </AnchorPane>
-            <AnchorPane AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <AnchorPane disable="true" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
                <children>
                   <Text fx:id="survivorsTitle" fill="#b7d000" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="title" text="Survivors:" wrappingWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="7.0">
                      <font>

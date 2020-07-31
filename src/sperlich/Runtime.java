@@ -5,6 +5,8 @@ import com.sun.jna.platform.win32.BaseTSD;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
+import com.sun.xml.internal.fastinfoset.Encoder;
+
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -46,6 +48,7 @@ import lc.kra.system.keyboard.event.GlobalKeyEvent;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.awt.Desktop;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -60,7 +63,7 @@ import java.io.InputStreamReader;
 import java.io.File;
 
 public class Runtime extends Application {
-	public static String appVersion = "v1.8.1";
+	public static String appVersion = "v1.8.3";
 	public static String download = "https://www.sperlich.at/storage/content/DBD%20Plus.jar";
 	public static String downloadPath = System.getProperty("user.dir") + "/DBD Plus.jar";
 	public static String killerSteamURL;
@@ -522,7 +525,7 @@ public class Runtime extends Application {
 			}
 		}
 		CheckMenuItem toggler = (CheckMenuItem) loader.getNamespace().get("toggleMap");
-		toggler.setSelected(config.map);
+		toggler.setSelected(Runtime.config.map);
 	}
 	
 	public void updateOverlayOpacity() {
@@ -592,7 +595,7 @@ public class Runtime extends Application {
 		Log.out("Sending Feedback...");
 		 URL link;
 		try {
-			String text = feedback.getText().replace("\n", "_").replace("\r", "_").replace(" ", "_").trim();
+			String text = URLEncoder.encode(feedback.getText(), Encoder.UTF_8);
 			Log.out("Trying to send: '" + text + "'");
 			link = new URL("https://www.sperlich.at/dbdplus.php?fromuser=true&username="+getPcname()+"&feedback=true&comment=" + text);
 			BufferedReader site = new BufferedReader(new InputStreamReader(link.openStream()));
@@ -623,6 +626,11 @@ public class Runtime extends Application {
 	public void openSteamProfile() {
 		Log.out("Trying to open URL: " + killerSteamURL);
 		openWebpage(killerSteamURL);
+	}
+	
+	public void openTwitter() {
+		Log.out("Trying to open URL: https://twitter.com/DbdPlus");
+		openWebpage("https://twitter.com/DbdPlus");
 	}
 	
 	public void mouseKillerPicEnter() {
@@ -766,10 +774,14 @@ public class Runtime extends Application {
 	}
 	
 	public void showPatchnotes() {
-		Alert al = new Alert(Alert.AlertType.INFORMATION, "Version 1.8.1 \n "
+		Alert al = new Alert(Alert.AlertType.INFORMATION, "Version 1.8.3 \n "
+				+ "\n - Fixed Feedback feature. \n(Please resend me your comments, I didn't receive them properly) \n"
 				+ "\n - Implemented Overlay UI-Rescale option."
 				+ "\n - Window screen position remains after restart."
-				+ "\n - Patchnotes show up automaticially after disclaimer.");
+				+ "\n - Patchnotes show up automaticially after disclaimer."
+				+ "\n - Added Twitter Socialmedia icon."
+				+ "\n - Fixed loading bug for mapname text."
+				+ "\n - Refined some UI elements.");
 		al.setTitle("Patchnotes");
 		al.setResizable(true);
 		Stage aStage = (Stage) al.getDialogPane().getScene().getWindow();

@@ -437,7 +437,9 @@ public class GameReader extends Thread {
 		//Runtime.palletsBox.setVisible(true);
 		//Runtime.vaultsBox.setVisible(true);
 		//Runtime.survivorsTitle.setVisible(true);
-		//Runtime.mapBox.setVisible(true);
+		if (Runtime.config.map) {
+			Runtime.mapBox.setVisible(true);
+		}
 		playerIsIngame = true;
 		startLineNumber = lineCount;
 		Runtime.setText(Runtime.matchStatusTime, "Loading");

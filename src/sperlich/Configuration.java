@@ -30,6 +30,7 @@ public class Configuration implements Serializable {
 	public int overlayPosY;
 	public int mainWindowPosX;
 	public int mainWindowPosY;
+	public int version183;
 
 	public void save() {
 		try {
