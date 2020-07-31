@@ -1,7 +1,7 @@
 ### ATTENTION
 
 Due to Patch 4.1.0 this software is deprecated and won't be developed any further! Reason: Behaviour encrypted their logfile which results in illegibility.
-I'm not experienced in encryption and doesn't know if there any way to resolve this problem and find an other way, so I'm giving up this piece of software and stop developement. If any you of does know a way, the source code is free to use, so knock yourself out if you want to give it a try.
+I'm not experienced in encryption and doesn't know if there is any way to resolve this problem and find an other way, so I'm giving up this piece of software and stop developement. If any you of does know a way, the source code is free to use, so knock yourself out if you want to give it a try.
 
 Note: I'm actually not surprised by this and I'm happy that Behaviour finally fixed this issue. It was ridiculous that this logfile even existed in this way :)
 
