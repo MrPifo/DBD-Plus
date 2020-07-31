@@ -1,6 +1,6 @@
 ### Attention
 
-![Image description](https://www.sperlich.at/assets/pictures/attention.jpg)
+![Image description](https://www.sperlich.at/assets/pictures/attention2.jpg)
 
 Due to Patch 4.1.0 this software is deprecated and won't be developed any further! Reason: Behaviour encrypted their logfile which results in illegibility.
 I'm not experienced in encryption and doesn't know if there is any way to resolve this problem and find an other way, so I'm giving up this piece of software and stop developement. If any of you does know a way, the source code is free to use, so knock yourself out if you want to give it a try. You can send me your version if you like and will upload the newer version here and credit you for that if it is working. 
